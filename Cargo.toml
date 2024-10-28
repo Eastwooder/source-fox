@@ -6,7 +6,7 @@ edition = "2021"
 
 [workspace.dependencies]
 tracing = { version = "0.1.40", features = ["attributes", "valuable"] }
-serde = { version = "1.0.204", features = ["derive"] }
+serde = { version = "1.0.214", features = ["derive"] }
 
 [workspace]
 resolver = "2"

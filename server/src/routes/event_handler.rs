@@ -185,10 +185,13 @@ mod test {
 
         let mut rng = rand_chacha::ChaCha20Rng::seed_from_u64(17_832_551);
         let bits = 256;
-        let priv_key = rsa::RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
-        let pub_key = rsa::RsaPublicKey::from(&priv_key);
+        let private_key =
+            rsa::RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
+        let pub_key = rsa::RsaPublicKey::from(&private_key);
 
-        let der_encoded_key = priv_key.to_pkcs8_pem(rsa::pkcs8::LineEnding::LF).unwrap();
+        let der_encoded_key = private_key
+            .to_pkcs8_pem(rsa::pkcs8::LineEnding::LF)
+            .unwrap();
         let cert_pem_str = der_encoded_key.to_string();
 
         let secret = SecretKey::from_slice(&[0; 32]).unwrap();
@@ -208,7 +211,7 @@ mod test {
     fn calc_hmac_for_body(secret: &SecretKey, data: &[u8]) -> String {
         hex::encode(
             HmacSha256::hmac(&secret, data)
-                .unwrap()
+                .expect("unable to generate hmac-256 for data!")
                 .unprotected_as_bytes(),
         )
     }

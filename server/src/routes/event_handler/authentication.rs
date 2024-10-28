@@ -62,5 +62,6 @@ impl GitHubAuthenticator for Octocrab {
 impl InstallationAuthenticator for Octocrab {
     fn for_installation(&self, id: InstallationId) -> impl GitHubActionalbe {
         self.installation(id)
+            .expect("TODO: fix this, did not find installation")
     }
 }
