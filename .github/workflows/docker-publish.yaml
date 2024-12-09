@@ -1,9 +1,9 @@
 name: Publish Docker Image
 on:
   workflow_run:
-    workflows: [ Check ]
-    types: [ completed ]
-    branches: [ main ]
+    workflows: [Check]
+    types: [completed]
+    branches: [main]
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -30,7 +30,7 @@ jobs:
       - name: Use cachix binary cache
         uses: cachix/cachix-action@v12
         with:
-          name: source-fox
+          name: wild-git-yonder
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           extraPullNames: nix-community
       - id: sanitize-repository-name
@@ -40,7 +40,7 @@ jobs:
       - name: Build and load Docker image
         run: |
           nix build .#server-docker-stream && ./result | docker load
-          docker tag source-warden:latest ${{ env.REGISTRY }}/${{ steps.sanitize-repository-name.outputs.repository }}:latest
+          docker tag wild-git-yonder:latest ${{ env.REGISTRY }}/${{ steps.sanitize-repository-name.outputs.repository }}:latest
       - name: Push Docker image
         run: |
           docker push ${{ env.REGISTRY }}/${{ steps.sanitize-repository-name.outputs.repository }}:latest

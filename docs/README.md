@@ -1,6 +1,6 @@
-# SourceWarden
+# Wild Git Yonder (WGY)
 
-[![Check](https://github.com/Eastwooder/source-warden/actions/workflows/check.yaml/badge.svg)](https://github.com/Eastwooder/source-warden/actions/workflows/check.yaml)
+[![Check](https://github.com/Eastwooder/wild-git-yonder/actions/workflows/check.yaml/badge.svg)](https://github.com/Eastwooder/wild-git-yonder/actions/workflows/check.yaml)
 
 A GitHub Application meant to watch over your source code.
 
@@ -26,14 +26,14 @@ To run the server your can just execute `nix run .#server`.
 
 You can either build the docker container as a single layer or stream all layers.
 
-- single layer  
-  
+- single layer
+
   ```shell
   nix build .#server-docker && zcat ./result | docker load
   ```
 
-- multiple layers  
-  
+- multiple layers
+
   ```shell
   nix build .#server-docker-stream && ./result | docker load
   ```
