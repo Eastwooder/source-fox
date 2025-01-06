@@ -4,56 +4,33 @@
     flake-utils.url = "github:numtide/flake-utils";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
-    crane = {
-      url = "github:ipetkov/crane";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-    # The version of wasm-bindgen-cli needs to match the version in Cargo.lock
-    # Update this to include the version you need
-    nixpkgs-for-wasm-bindgen.url = "github:NixOS/nixpkgs/4e6868b1aa3766ab1de169922bb3826143941973";
+    crane.url = "github:ipetkov/crane";
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
       };
     };
+    advisory-db = {
+      url = "github:rustsec/advisory-db";
+      flake = false;
+    };
   };
-  outputs = { self, nixpkgs, flake-utils, rust-overlay, crane, nixpkgs-for-wasm-bindgen, pre-commit-hooks }:
+  outputs = { self, nixpkgs, flake-utils, rust-overlay, crane, pre-commit-hooks, advisory-db }:
     flake-utils.lib.eachDefaultSystem
       (system:
         let
-          overlays = [ (import rust-overlay) ];
           pkgs = import nixpkgs {
-            inherit system overlays;
-            # config.allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
-            #   # "vscode-with-extensions-1.86.0"
-            #   "vscode-extension-ms-vscode-remote-remote-containers-0.305.0"
-            # ];
-            config.allowUnfree = true;
+            inherit system;
+            overlays = [ (import rust-overlay) ];
           };
 
           # import and bind toolchain to the provided `rust-toolchain.toml` in the root directory
-          rustToolchain = (pkgs.pkgsBuildHost.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml).override {
-            # Set the build targets supported by the toolchain, wasm32-unknown-unknown is required for trunk.
-            extensions = [
-              "rust-src" # needed by rust-analyzer vscode extension when installed through internet
-              "rust-analyzer"
-            ];
-            targets = [ "wasm32-unknown-unknown" ];
-          };
-          craneLib = ((crane.mkLib pkgs).overrideToolchain rustToolchain).overrideScope (_final: _prev: {
-            # The version of wasm-bindgen-cli needs to match the version in Cargo.lock. You
-            # can unpin this if your nixpkgs commit contains the appropriate wasm-bindgen-cli version
-            inherit (import nixpkgs-for-wasm-bindgen { inherit system; }) wasm-bindgen-cli;
-          });
+          rustToolchain = (pkgs.pkgsBuildHost.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml);
+          rustNightly = pkgs.pkgsBuildHost.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default);
+          craneLib = ((crane.mkLib pkgs).overrideToolchain rustToolchain);
 
           # declare the sources
           src = pkgs.lib.cleanSourceWith {
@@ -65,71 +42,44 @@
               (craneLib.filterCargoSources path type)
             ;
           };
-          wasmSrc = pkgs.lib.cleanSourceWith {
-            src = ./.;
-            filter = path: type:
-              # include all html and scss files
-              (pkgs.lib.hasSuffix "\.html" path) ||
-              (pkgs.lib.hasSuffix "\.scss" path) ||
-              # Include additional assets we may have
-              (pkgs.lib.hasInfix "/assets/" path) ||
-              # Default filter from crane (allow .rs files)
-              (craneLib.filterCargoSources path type)
-            ;
-          };
-
-          # declare the build inputs used to build the projects
-          nativeBuildInputs = with pkgs; [
-            rustToolchain
-            pkg-config
-            act
-          ] ++ macosBuildInputs;
-          # declare the build inputs used to link and run the projects, will be included in the final artifact container
-          buildInputs = with pkgs; [ openssl sqlite ];
-          macosBuildInputs = with pkgs.darwin.apple_sdk.frameworks;
-            [ ]
-            ++ (nixpkgs.lib.optionals (nixpkgs.lib.hasSuffix "-darwin" system) [
-              Security
-              CoreFoundation
-            ]);
-
           # declare build arguments
           commonArgs = {
-            inherit src buildInputs nativeBuildInputs;
-          };
-          wasmArgs = {
-            src = wasmSrc;
-            pname = "wasm-client";
-            cargoExtraArgs = "-p service-ui";
-            CARGO_BUILD_TARGET = "wasm32-unknown-unknown";
+            inherit src;
+            strictDeps = true;
+            buildInputs = with pkgs; [ openssl ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+              pkgs.libiconv
+              pkgs.darwin.apple_sdk.frameworks.Security
+              pkgs.darwin.apple_sdk.frameworks.CoreFoundation
+            ];
+            nativeBuildInputs = with pkgs; [ pkg-config ];
           };
 
           # Cargo artifact dependency output
           cargoArtifacts = craneLib.buildDepsOnly commonArgs;
-          cargoArtifactsWasm = craneLib.buildDepsOnly (wasmArgs // {
-            doCheck = false;
-          });
 
-          # Actual targets to be built and executed
-          service-ui = craneLib.buildTrunkPackage (wasmArgs // {
-            inherit cargoArtifactsWasm;
-            pname = "service-ui";
-            cargoExtraArgs = "-p service-ui";
-            trunkIndexPath = "service-ui/index.html";
-            # The version of wasm-bindgen-cli here must match the one from Cargo.lock.
-            wasm-bindgen-cli = pkgs.wasm-bindgen-cli.override {
-              version = "0.2.90";
-              hash = "sha256-X8+DVX7dmKh7BgXqP7Fp0smhup5OO8eWEhn26ODYbkQ=";
-              cargoHash = "sha256-ckJxAR20GuVGstzXzIj1M0WBFj5eJjrO2/DRMUK5dwM=";
-            };
-          });
-
-          server = craneLib.buildPackage (commonArgs // {
+          individualCrateArgs = commonArgs // {
             inherit cargoArtifacts;
+            inherit (craneLib.crateNameFromCargoToml { inherit src; }) version;
+            # NB: we disable tests since we'll run them all via cargo-nextest
+            doCheck = false;
+          };
+
+          fileSetForCrate = crate: pkgs.lib.fileset.toSource {
+            root = ./.;
+            fileset = pkgs.lib.fileset.unions [
+              ./Cargo.toml
+              ./Cargo.lock
+              (craneLib.fileset.commonCargoSources ./github-event-receiver)
+              (craneLib.fileset.commonCargoSources ./mergeable-compatibility-layer)
+              (craneLib.fileset.commonCargoSources crate)
+            ];
+          };
+
+          server = craneLib.buildPackage (individualCrateArgs // {
             pname = "server";
             cargoExtraArgs = "-p server";
-            buildInputs = [ pkgs.cmake pkgs.openssl ];
-            CLIENT_DIST = service-ui;
+            src = fileSetForCrate ./server;
+            buildInputs = with pkgs; [ cmake openssl ];
           });
 
           serverOci = {
@@ -145,6 +95,13 @@
           serverOciStream = pkgs.dockerTools.streamLayeredImage ({
             contents = [ server ];
           } // serverOci);
+
+          scripts = [
+            (pkgs.writeScriptBin "strip-unused-dependencies" ''
+              #!${pkgs.zsh}/bin/zsh
+              RUSTC=${rustNightly}/bin/rustc ${rustNightly}/bin/cargo udeps --all-targets
+            '') # cargo-udeps needs nightly, hence the nightly invocation
+          ];
         in
         with pkgs;
         {
@@ -153,21 +110,32 @@
 
           # executes all checks
           checks = {
-            inherit server service-ui;
-            wild-git-yonder-clippy = craneLib.cargoClippy (commonArgs // {
+            inherit server;
+            workspace-clippy = craneLib.cargoClippy (commonArgs // {
               inherit cargoArtifacts;
-              cargoClippyExtraArgs = "--all-targets";
-              CLIENT_DIST = "";
+              cargoClippyExtraArgs = "--all-targets -- --deny warnings";
             });
-            wild-git-yonder-fmt = craneLib.cargoFmt commonArgs;
+            workspace-doc = craneLib.cargoDoc (commonArgs // {
+              inherit cargoArtifacts;
+            });
+            workspace-fmt = craneLib.cargoFmt {
+              inherit src;
+            };
+            # Run tests with cargo-nextest
+            # Consider setting `doCheck = false` on other crate derivations
+            # if you do not want the tests to run twice
+            workspace-nextest = craneLib.cargoNextest (commonArgs // {
+              inherit cargoArtifacts;
+              partitions = 1;
+              partitionType = "count";
+              cargoNextestPartitionsExtraArgs = "--no-tests=pass";
+            });
             # pre-commit-checks to be installed for the dev environment
             pre-commit-check = pre-commit-hooks.lib.${system}.run {
               src = ./.;
-
               # git commit hooks
               hooks = {
                 nixpkgs-fmt.enable = true;
-                # clippy.enable = true;
                 rustfmt.enable = true;
                 markdownlint.enable = true;
                 commitizen.enable = true;
@@ -178,7 +146,7 @@
 
           # packages to build and provide
           packages = {
-            inherit server service-ui;
+            inherit server;
             server-docker = serverOciImage;
             server-docker-stream = serverOciStream;
             default = server;
@@ -199,43 +167,18 @@
             inherit (self.checks.${system}.pre-commit-check) shellHook;
             inputsFrom = [
               server
-              service-ui
             ];
-            # used by codium - pins the rust-analyzer version to this project's rust version
-            RUST_ANALYZER_SERVER_PATH = "${rustToolchain}/bin/rust-analyzer";
+
+            # Extra inputs can be added here; cargo and rustc are provided by default.
             packages = with pkgs; [
-              (vscode-with-extensions.override {
-                vscode = vscodium;
-                vscodeExtensions = with vscode-extensions; [
-                  # direnv/nix related
-                  mkhl.direnv
-                  jnoortheen.nix-ide
-                  arrterian.nix-env-selector
+              act # GitHub Actions runner for locally testing workflows
+              cargo-udeps # cargo extension for removing unused dependencies
+              cargo-edit # cargo extension for easier management of dependencies in the style of `cargo [rm|upgrade|set-version]`
+              cargo-nextest # nextest runner
+              cargo-deny # deny licenses
 
-                  # rust related plugins
-                  rust-lang.rust-analyzer
-                  serayuzgur.crates
-                  # dustypomerleau.rust-syntax
-
-                  # unfree, but helpful stuff
-                  ms-vscode-remote.remote-containers
-                  ms-azuretools.vscode-docker
-                ] ++ vscode-utils.extensionsFromVscodeMarketplace [
-                  # {
-                  #   name = "vscode-lldb";
-                  #   publisher = "vadimcn";
-                  #   version = "1.10.0";
-                  #   sha256 = "sha256-RAKv7ESw0HG/avBOPE1CTr0THsB7UWx0haJVd/Dm9Gg=";
-                  # }
-                  {
-                    name = "intellij-idea-keybindings";
-                    publisher = "k--kato";
-                    version = "1.5.13";
-                    sha256 = "sha256-IewHupCMUIgtMLcMV86O0Q1n/0iUgknHMR8m8fci5OU=";
-                  }
-                ];
-              })
-            ];
+              bacon # background code checker
+            ] ++ scripts;
           };
         });
 }

@@ -15,6 +15,7 @@ async fn frontend_ui() -> &'static str {
     // TODO: fix this later on
     //   const SERVE: &str = include_str!(env!("CLIENT_DIST"));
     //   SERVE
-    const SERVE: &str = env!("CLIENT_DIST");
+    // const SERVE: &str = env!("CLIENT_DIST");
+    const SERVE: &str = "serve";
     const_format::concatcp!("Hello ", SERVE)
 }

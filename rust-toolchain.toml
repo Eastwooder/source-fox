@@ -1,10 +1,4 @@
 [toolchain]
-channel = "nightly-2024-07-31"
-components = [
-    "cargo",
-    "clippy",
-    "rustc",
-    "rustfmt",
-    "rust-analysis",
-    "rust-analyzer",
-]
+channel = "1.83.0"
+targets = ["wasm32-unknown-unknown", "wasm32-wasip2"]
+components = ["clippy", "rust-analyzer"]

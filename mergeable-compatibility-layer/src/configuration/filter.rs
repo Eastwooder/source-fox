@@ -8,10 +8,10 @@ use crate::configuration::basics::{BooleanClause, ChainedAndOrIncludeExcludeClau
 pub enum Filter {
     /// supported events 'pull_request.*', 'pull_request_review.*'
     #[serde(rename = "author")]
-    Author(TheAuthor),
+    Author(Box<TheAuthor>),
     /// supported events 'pull_request.*', 'pull_request_review.*'
     #[serde(rename = "repository")]
-    Repository(TheRepository),
+    Repository(Box<TheRepository>),
     /// supported events 'pull_request.*', 'pull_request_review.*', issues.*'
     #[serde(rename = "payload")]
     Payload(ThePayload),

@@ -207,7 +207,7 @@ mod test {
 
     fn calc_hmac_for_body(secret: &SecretKey, data: &[u8]) -> String {
         hex::encode(
-            HmacSha256::hmac(&secret, data)
+            HmacSha256::hmac(secret, data)
                 .unwrap()
                 .unprotected_as_bytes(),
         )

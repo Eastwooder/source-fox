@@ -6,88 +6,88 @@ mergeable:
       # list of filters (optional). Specify one or more.
       - do: author
         must_include:
-          regex: 'user-1-1'
-          message: 'Custom include message...'
+          regex: "user-1-1"
+          message: "Custom include message..."
         must_exclude:
-          regex: 'user-1-2'
-          message: 'Custom exclude message...'
-        team: 'org/team-slug'  # verify that the author is in the team
+          regex: "user-1-2"
+          message: "Custom exclude message..."
+        team: "org/team-slug" # verify that the author is in the team
         # all of the message sub-option is optional
       - do: author
         and:
           - must_exclude:
-              regex: 'bot-user-2-0'
-              message: 'Custom message...'
+              regex: "bot-user-2-0"
+              message: "Custom message..."
         or:
           - must_include:
-              regex: 'user-2-1'
-              message: 'Custom message...'
+              regex: "user-2-1"
+              message: "Custom message..."
           - must_include:
-              regex: 'user-2-2'
-              message: 'Custom message...'
+              regex: "user-2-2"
+              message: "Custom message..."
       - do: author
         and:
           - or:
               - must_include:
-                  regex: 'user-3-1'
-                  message: 'Custom message...'
+                  regex: "user-3-1"
+                  message: "Custom message..."
               - must_include:
-                  regex: 'user-3-2'
-                  message: 'Custom message...'
+                  regex: "user-3-2"
+                  message: "Custom message..."
           - must_exclude:
-              regex: 'bot-user-3-0'
-              message: 'Custom message...'
+              regex: "bot-user-3-0"
+              message: "Custom message..."
 
       - do: repository
-        visibility: 'public' # Can be public or private
+        visibility: "public" # Can be public or private
         name:
           must_include:
-            regex: 'my-repo-name-a0'
+            regex: "my-repo-name-a0"
           must_exclude:
-            regex: 'other-repo-name-a0'
+            regex: "other-repo-name-a0"
         topics:
           must_include:
-            regex: 'my-topic-a0'
-            message: 'Custom message...'
+            regex: "my-topic-a0"
+            message: "Custom message..."
           must_exclude:
-            regex: 'other-topic-a0'
-            message: 'Custom message...'
+            regex: "other-topic-a0"
+            message: "Custom message..."
           # all of the message sub-option is optional
       - do: repository
         topics:
           and:
             - must_include:
-                regex: 'topic-1-a1'
-                message: 'Custom message...'
+                regex: "topic-1-a1"
+                message: "Custom message..."
             - must_include:
-                regex: 'topic-2-a1'
-                message: 'Custom message...'
+                regex: "topic-2-a1"
+                message: "Custom message..."
           or:
             - must_include:
-                regex: 'topic-3-a1'
-                message: 'Custom message...'
+                regex: "topic-3-a1"
+                message: "Custom message..."
             - must_include:
-                regex: 'topic-4-a1'
-                message: 'Custom message...'
+                regex: "topic-4-a1"
+                message: "Custom message..."
       - do: repository
         topics:
           and:
             - or:
                 - must_include:
-                    regex: 'topic-1-a2'
-                    message: 'Custom message...'
+                    regex: "topic-1-a2"
+                    message: "Custom message..."
                 - must_include:
-                    regex: 'topic-2-a2'
-                    message: 'Custom message...'
+                    regex: "topic-2-a2"
+                    message: "Custom message..."
             - must_include:
-                regex: 'topic-3-a2'
-                message: 'Custom message...'
+                regex: "topic-3-a2"
+                message: "Custom message..."
 
       - do: payload
         review:
           state:
             must_include:
-              regex: 'changes_requested'
+              regex: "changes_requested"
       - do: payload
         pull_request:
           draft:
@@ -97,13 +97,13 @@ mergeable:
         pull_request:
           labels:
             must_include:
-              regex: 'foo'
-              key: 'name'
+              regex: "foo"
+              key: "name"
 
       - do: and
         filter:
           - do: author
-            must_include: 'user-1-1-1-1'
+            must_include: "user-1-1-1-1"
           - do: repository
             visibility: public
       - do: and
@@ -111,15 +111,15 @@ mergeable:
           - do: or
             filter:
               - do: author
-                must_include: 'user-1'
+                must_include: "user-1"
               - do: author
-                must_include: 'user-2'
+                must_include: "user-2"
           - do: repository
             visibility: public
       - do: or
         filter:
           - do: author
-            must_include: 'user-1'
+            must_include: "user-1"
           - do: repository
             visibility: public
       - do: and
@@ -127,15 +127,15 @@ mergeable:
           - do: or
             filter:
               - do: author
-                must_include: 'user-1'
+                must_include: "user-1"
               - do: author
-                must_include: 'user-2'
+                must_include: "user-2"
           - do: repository
             visibility: public
       - do: not
         filter:
           - do: author
-            must_include: 'user-1'
+            must_include: "user-1"
           - do: repository
             visibility: public
       - do: not
@@ -143,100 +143,100 @@ mergeable:
           - do: or
             filter:
               - do: author
-                must_include: 'user-1'
+                must_include: "user-1"
               - do: author
-                must_include: 'user-2'
+                must_include: "user-2"
 
     validate:
       - do: age # validate based on the age of PR
         created_at:
           days: 1
-          message: 'PR needs to at least 1 day old in order to merge' # optional, custom message to display if the validation fails
+          message: "PR needs to at least 1 day old in order to merge" # optional, custom message to display if the validation fails
         updated_at:
           days: 1
-          message: 'PR needs to be update free for 1 day before merging' # optional, custom message to display if the validation fails
+          message: "PR needs to be update free for 1 day before merging" # optional, custom message to display if the validation fails
 
       - do: approvals
         min:
           count: 2 # Number of minimum reviewers. In this case 2.
-          message: 'Custom message...'
+          message: "Custom message..."
         required:
-          reviewers: [ user1, user2 ] # list of github usernames required to review
+          reviewers: [user1, user2] # list of github usernames required to review
           owners: true # Optional boolean. When true, the file .github/CODEOWNERS is read and owners made required reviewers
           assignees: true # Optional boolean. When true, PR assignees are made required reviewers.
           requested_reviewers: true # Optional boolean. When true, all the requested reviewer's approval is required
-          message: 'Custom message...'
+          message: "Custom message..."
         block:
           changes_requested: true # If true, block all approvals when one of the reviewers gave 'changes_requested' review
-          message: 'Custom message...'
+          message: "Custom message..."
         limit:
-          teams: ['org/team_slug'] # when the option is present, only the approvals from the team members will count
-          users: ['user1', 'user2'] # when the option is present, approvals from users in this list will count
+          teams: ["org/team_slug"] # when the option is present, only the approvals from the team members will count
+          users: ["user1", "user2"] # when the option is present, approvals from users in this list will count
           owners: true # Optional boolean. When true, the file .github/CODEOWNER is read and only owners approval will count
         exclude:
-          users: ['bot1', 'bot2'] # when the option is present, approvals from users in this list will NOT count
+          users: ["bot1", "bot2"] # when the option is present, approvals from users in this list will NOT count
 
       - do: assignee
         max:
           count: 2 # There should not be more than 2 assignees
-          message: 'test string' # this is optional
+          message: "test string" # this is optional
         min:
           count: 2 # min number of assignees
-          message: 'test string' # this is optional
+          message: "test string" # this is optional
 
       - do: author
         must_include:
-          regex: 'user-1'
-          message: 'Custom include message...'
+          regex: "user-1"
+          message: "Custom include message..."
         must_exclude:
-          regex: 'user-2'
-          message: 'Custom exclude message...'
-        team: 'org/team-slug'  # verify that the author is in the team
+          regex: "user-2"
+          message: "Custom exclude message..."
+        team: "org/team-slug" # verify that the author is in the team
         # all of the message sub-option is optional
       - do: author
         and:
           - must_exclude:
-              regex: 'bot-user-1'
-              message: 'Custom message...'
+              regex: "bot-user-1"
+              message: "Custom message..."
         or:
           - must_include:
-              regex: 'user-1'
-              message: 'Custom message...'
+              regex: "user-1"
+              message: "Custom message..."
           - must_include:
-              regex: 'user-2'
-              message: 'Custom message...'
+              regex: "user-2"
+              message: "Custom message..."
       - do: author
         and:
           - or:
               - must_include:
-                  regex: 'user-1'
-                  message: 'Custom message...'
+                  regex: "user-1"
+                  message: "Custom message..."
               - must_include:
-                  regex: 'user-2'
-                  message: 'Custom message...'
+                  regex: "user-2"
+                  message: "Custom message..."
           - must_exclude:
-              regex: 'bot-user-1'
-              message: 'Custom message...'
+              regex: "bot-user-1"
+              message: "Custom message..."
 
       - do: baseRef
         must_include:
-          regex: 'master|feature-branch1'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...'
+          regex: "master|feature-branch1"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..."
         must_exclude:
-          regex: 'feature-branch2'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...'
-        mediaType:  # Optional. Required by status.* events to enable the groot preview on some Github Enterprise servers
-          previews: 'array'
+          regex: "feature-branch2"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..."
+        mediaType: # Optional. Required by status.* events to enable the groot preview on some Github Enterprise servers
+          previews: "array"
       - do: baseRef
         must_exclude:
-          regex: 'master'
-          message: 'Merging into repo:master is forbidden'
+          regex: "master"
+          message: "Merging into repo:master is forbidden"
       - do: baseRef
         must_include:
-          regex: 'master|main'
-          message: 'Auto-merging is only enabled for default branch'
+          regex: "master|main"
+          message: "Auto-merging is only enabled for default branch"
         mediaType:
           previews:
             - groot
@@ -244,25 +244,25 @@ mergeable:
       - do: changeset # validate against the files in the PR
         no_empty:
           enabled: false # Cannot be empty when true.
-          message: 'Custom message...'
+          message: "Custom message..."
         must_include:
-          regex: 'yarn.lock'
-          message: 'Custom message...'
+          regex: "yarn.lock"
+          message: "Custom message..."
         must_exclude:
-          regex: 'package.json'
-          message: 'Custom message...'
+          regex: "package.json"
+          message: "Custom message..."
         begins_with:
-          match: 'A String' # or array of strings
-          message: 'Some message...'
+          match: "A String" # or array of strings
+          message: "Some message..."
         ends_with:
-          match: 'A String' # or array of strings
-          message: 'Come message...'
+          match: "A String" # or array of strings
+          message: "Come message..."
         min:
           count: 2 # min number of files in a PR
-          message: 'Custom message...'
+          message: "Custom message..."
         max:
           count: 2 # max number of files in a PR
-          message: 'Custom message...'
+          message: "Custom message..."
         files: # status of files to be included in changeset. If no 'files' option is provided, all files are included.
           added: true # default: false. If true, added files are included.
           modified: false # default: false. If true, modified files are included.
@@ -272,136 +272,136 @@ mergeable:
       - do: changeset # validate against the files in the PR
         and:
           - must_include:
-              regex: 'doc/.*'
-              message: 'Custom message...'
+              regex: "doc/.*"
+              message: "Custom message..."
           - must_include:
-              regex: 'changelog.md'
-              message: 'Custom message...'
+              regex: "changelog.md"
+              message: "Custom message..."
         or:
           - must_include:
-              regex: 'package-lock.json'
-              message: 'Custom message...'
+              regex: "package-lock.json"
+              message: "Custom message..."
           - must_include:
-              regex: 'yarn.lock'
-              message: 'Custom message...'
+              regex: "yarn.lock"
+              message: "Custom message..."
       - do: changeset # validate against the files in the PR
         and:
           - or:
               - must_include:
-                  regex: 'package-lock.json'
-                  message: 'Custom message...'
+                  regex: "package-lock.json"
+                  message: "Custom message..."
               - must_include:
-                  regex: 'package.json'
-                  message: 'Custom message...'
+                  regex: "package.json"
+                  message: "Custom message..."
           - must_include:
-              regex: 'yarn.lock'
-              message: 'Custom message...'
+              regex: "yarn.lock"
+              message: "Custom message..."
 
       - do: commit
         message:
           regex: '^(feat|docs|chore|fix|refactor|test|style|perf)(\(\w+\))?:.+$'
-          message: 'Custom message' # Semantic release conventions must be followed
+          message: "Custom message" # Semantic release conventions must be followed
           skip_merge: true # Optional, Default is true. Will skip commit with message that includes 'Merge'
           oldest_only: false # Optional, Default is false. Only check the regex against the oldest commit
           newest_only: false # Optional, Default is false. Only check the regex against the newest commit
           single_commit_only: false # Optional, Default is false. only process this validator if there is one commit
-          message_type: '' # Optional, only check regex against the field specified. Default is '', which processes the 'message' field. Can also be set to 'author_email' or 'committer_email'
+          message_type: "" # Optional, only check regex against the field specified. Default is '', which processes the 'message' field. Can also be set to 'author_email' or 'committer_email'
         jira:
           regex: '[A-Z][A-Z0-9]+-\d+'
           regex_flag: none
-          message: 'The Jira ticket does not exist'
+          message: "The Jira ticket does not exist"
 
       - do: contents
         files: # determine which files contents to validate
           pr_diff: true # If true, validator will grab all the added and modified files in the head of the PR
-          ignore: ['.github/mergeable.yml'] # Optional, default ['.github/mergeable.yml'], pattern of files to ignore
+          ignore: [".github/mergeable.yml"] # Optional, default ['.github/mergeable.yml'], pattern of files to ignore
         must_include:
-          regex: 'yarn.lock'
-          message: 'Custom message...'
+          regex: "yarn.lock"
+          message: "Custom message..."
         must_exclude:
-          regex: 'package.json'
-          message: 'Custom message...'
+          regex: "package.json"
+          message: "Custom message..."
         begins_with:
-          match: 'A String' # or array of strings
-          message: 'Some message...'
+          match: "A String" # or array of strings
+          message: "Some message..."
         ends_with:
-          match: 'A String' # or array of strings
-          message: 'Come message...'
+          match: "A String" # or array of strings
+          message: "Come message..."
 
       - do: dependent
-        files: ['package.json', 'yarn.lock'] # list of files that are dependent on one another and must all be part of the changes in a PR.
-        message: 'Custom message...' # this is optional, a default message is used when not specified.
+        files: ["package.json", "yarn.lock"] # list of files that are dependent on one another and must all be part of the changes in a PR.
+        message: "Custom message..." # this is optional, a default message is used when not specified.
       - do: dependent
         changed:
           file: package.json
-          files: ['package-lock.json', 'yarn.lock']
-        message: 'Custom message...' # this is optional, a default message is used when not specified.
+          files: ["package-lock.json", "yarn.lock"]
+        message: "Custom message..." # this is optional, a default message is used when not specified.
 
       - do: description
         no_empty:
           enabled: false # Cannot be empty when true.
-          message: 'Custom message...' # this is optional, a default message is used when not specified.
+          message: "Custom message..." # this is optional, a default message is used when not specified.
         must_include:
-          regex: '### Goals|### Changes'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          regex: "### Goals|### Changes"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
           message: >
             Please describe the goals (why) and changes (what) of the PR.
           # message is is optional, a default message is used when not specified.
         must_exclude:
-          regex: 'DO NOT MERGE'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...' # optional
+          regex: "DO NOT MERGE"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..." # optional
         begins_with:
-          match: '### Goals' # or array of strings
-          message: 'Some message...' #optional
+          match: "### Goals" # or array of strings
+          message: "Some message..." #optional
         ends_with:
-          match: 'Any last sentence' # array of strings
-          message: 'Come message...' # optional
+          match: "Any last sentence" # array of strings
+          message: "Come message..." # optional
         jira:
           regex: '[A-Z][A-Z0-9]+-\d+'
           regex_flag: none
-          message: 'The Jira ticket does not exist'
+          message: "The Jira ticket does not exist"
       - do: description
         and:
           - must_include:
-              regex: '### Goals'
-              message: 'Custom message...'
+              regex: "### Goals"
+              message: "Custom message..."
           - must_include:
-              regex: '### Changes'
-              message: 'Custom message...'
+              regex: "### Changes"
+              message: "Custom message..."
         or:
           - must_include:
-              regex: '### Bug Description'
-              message: 'Custom message...'
+              regex: "### Bug Description"
+              message: "Custom message..."
           - must_include:
-              regex: '### Feature Description'
-              message: 'Custom message...'
+              regex: "### Feature Description"
+              message: "Custom message..."
       - do: description
         and:
           - or:
               - must_include:
-                  regex: '### Bug Description'
-                  message: 'Custom message...'
+                  regex: "### Bug Description"
+                  message: "Custom message..."
               - must_include:
-                  regex: '### Feature Description'
-                  message: 'Custom message...'
+                  regex: "### Feature Description"
+                  message: "Custom message..."
           - must_include:
-              regex: '### Changes'
-              message: 'Custom message...'
+              regex: "### Changes"
+              message: "Custom message..."
 
       - do: headRef
         must_include:
-          regex: 'feature-branch1'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...'
+          regex: "feature-branch1"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..."
         must_exclude:
-          regex: 'feature-branch2'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...'
+          regex: "feature-branch2"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..."
         jira:
           regex: '[A-Z][A-Z0-9]+-\d+'
           regex_flag: none
-          message: 'The Jira ticket does not exist'
+          message: "The Jira ticket does not exist"
       - do: headRef
         must_include:
           regex: '^(feature|hotfix)\/.+$'
@@ -411,109 +411,109 @@ mergeable:
       - do: label
         no_empty:
           enabled: false # Cannot be empty when true.
-          message: 'Custom message...'
+          message: "Custom message..."
         must_include:
-          regex: 'type|chore|wont'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...'
+          regex: "type|chore|wont"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..."
         must_exclude:
-          regex: 'DO NOT MERGE'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...'
+          regex: "DO NOT MERGE"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..."
         begins_with:
-          match: 'A String' # or array of strings
-          message: 'Some message...'
+          match: "A String" # or array of strings
+          message: "Some message..."
         ends_with:
-          match: 'A String' # or array of strings
-          message: 'Come message...'
+          match: "A String" # or array of strings
+          message: "Come message..."
         jira:
           regex: '[A-Z][A-Z0-9]+-\d+'
           regex_flag: none
-          message: 'The Jira ticket does not exist'
+          message: "The Jira ticket does not exist"
         # all of the message sub-option is optional
       - do: label
         and:
           - must_include:
-              regex: 'big|medium|small'
-              message: 'Custom message...'
+              regex: "big|medium|small"
+              message: "Custom message..."
           - must_include:
-              regex: 'type|chore|wont'
-              message: 'Custom message...'
+              regex: "type|chore|wont"
+              message: "Custom message..."
         or:
           - must_include:
-              regex: 'Ready to merge'
-              message: 'Custom message...'
+              regex: "Ready to merge"
+              message: "Custom message..."
           - must_include:
-              regex: 'DO NOT MERGE'
-              message: 'Custom message...'
+              regex: "DO NOT MERGE"
+              message: "Custom message..."
       - do: label
         and:
           - or:
               - must_include:
-                  regex: 'feat|fix|chore'
-                  message: 'Custom message...'
+                  regex: "feat|fix|chore"
+                  message: "Custom message..."
               - must_include:
-                  regex: 'major|minor|patch'
-                  message: 'Custom message...'
+                  regex: "major|minor|patch"
+                  message: "Custom message..."
           - must_include:
-              regex: 'Ready to merge'
-              message: 'Custom message...'
+              regex: "Ready to merge"
+              message: "Custom message..."
 
       - do: milestone
         no_empty:
           enabled: true # Cannot be empty when true.
-          message: 'Custom message...'
+          message: "Custom message..."
         must_include:
-          regex: 'type|chore|wont'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...'
+          regex: "type|chore|wont"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..."
         must_exclude:
-          regex: 'DO NOT MERGE'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...'
+          regex: "DO NOT MERGE"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..."
         begins_with:
-          match: 'A String' # array of strings
-          message: 'Some message...'
+          match: "A String" # array of strings
+          message: "Some message..."
         ends_with:
-          match: 'A String' # array list of strings
-          message: 'Come message...'
+          match: "A String" # array list of strings
+          message: "Come message..."
         jira:
           regex: '[A-Z][A-Z0-9]+-\d+'
           regex_flag: none
-          message: 'The Jira ticket does not exist'
+          message: "The Jira ticket does not exist"
         # all of the message sub-option is optional
       - do: milestone
         and:
           - must_include:
-              regex: 'V1'
-              message: 'Custom message...'
+              regex: "V1"
+              message: "Custom message..."
           - must_include:
-              regex: 'October'
-              message: 'Custom message...'
+              regex: "October"
+              message: "Custom message..."
         or:
           - must_include:
-              regex: 'V2'
-              message: 'Custom message...'
+              regex: "V2"
+              message: "Custom message..."
           - must_include:
-              regex: 'Non breaking Changes'
-              message: 'Custom message...'
+              regex: "Non breaking Changes"
+              message: "Custom message..."
       - do: milestone
         and:
           - or:
               - must_include:
-                  regex: 'V1'
-                  message: 'Custom message...'
+                  regex: "V1"
+                  message: "Custom message..."
               - must_include:
-                  regex: 'September'
-                  message: 'Custom message...'
+                  regex: "September"
+                  message: "Custom message..."
           - must_include:
-              regex: 'V2'
-              message: 'Custom message...'
+              regex: "V2"
+              message: "Custom message..."
 
       - do: project
         must_include:
-          regex: 'type|chore|wont'
-          message: 'Custom message...'
+          regex: "type|chore|wont"
+          message: "Custom message..."
 
       - do: size
         lines:
@@ -533,8 +533,8 @@ mergeable:
             count: 500
             message: Change is very large. Should be under 500 lines of additions and deletions.
       - do: size
-        match: ['src']
-        ignore: ['package-lock.json', 'src/tests/__snapshots__/**', 'docs/*.md']
+        match: ["src"]
+        ignore: ["package-lock.json", "src/tests/__snapshots__/**", "docs/*.md"]
         lines:
           total:
             count: 500
@@ -547,329 +547,328 @@ mergeable:
         ignore_milestones: true # if set to true, the stale check will ignore items that have an associated milestone
         ignore_projects: true # if set to true, the stale check will ignore items that have an associated project
         label: # optional property to filter the items that are actioned upon
-          match: ['label1_to_match', 'label2_to_match'] # only items with matching labels will be actioned upon and marked as stale
-          ignore: ['label1_to_ignore', 'label2_to_ignore'] # items with these labels will be ignored and not marked as stale
+          match: ["label1_to_match", "label2_to_match"] # only items with matching labels will be actioned upon and marked as stale
+          ignore: ["label1_to_ignore", "label2_to_ignore"] # items with these labels will be ignored and not marked as stale
         time_constraint: # Optional, run the validator only if it in within the time constraint
-          time_zone: 'America/Los_Angeles' # Optional, UTC time by default, for valid timezones see `here <https://momentjs.com/timezone/>`_
-          hours_between: ['9', '17'] # Optional, 24 hours by default, run only if [0] >= Hour Now <= [1]
-          days_of_week: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] # Optional, 7 days a week by default, specific the days of the week in which to run the validator
+          time_zone: "America/Los_Angeles" # Optional, UTC time by default, for valid timezones see `here <https://momentjs.com/timezone/>`_
+          hours_between: ["9", "17"] # Optional, 24 hours by default, run only if [0] >= Hour Now <= [1]
+          days_of_week: ["Mon", "Tue", "Wed", "Thu", "Fri"] # Optional, 7 days a week by default, specific the days of the week in which to run the validator
 
       - do: title
         no_empty:
           enabled: true # Cannot be empty when true. A bit redundant in this case since GitHub don't really allow it. :-)
-          message: 'Custom message...'
+          message: "Custom message..."
         must_include:
-          regex: 'doc|feat|fix|chore'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...'
+          regex: "doc|feat|fix|chore"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..."
         must_exclude:
-          regex: 'DO NOT MERGE|WIP'
-          regex_flag: 'none' # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
-          message: 'Custom message...'
+          regex: "DO NOT MERGE|WIP"
+          regex_flag: "none" # Optional. Specify the flag for Regex. default is 'i', to disable default use 'none'
+          message: "Custom message..."
         begins_with:
-          match: ['doc','feat','fix','chore']
-          message: 'Some message...'
+          match: ["doc", "feat", "fix", "chore"]
+          message: "Some message..."
         ends_with:
-          match: 'A String' # or array of strings
-          message: 'Come message...'
+          match: "A String" # or array of strings
+          message: "Come message..."
           # all of the message sub-option is optional
         jira:
           regex: '[A-Z][A-Z0-9]+-\d+'
           regex_flag: none
-          message: 'The Jira ticket does not exist'
+          message: "The Jira ticket does not exist"
       - do: title
         and:
           - must_include:
               regex: 'ISSUE-\d+'
-              message: 'Custom message...'
+              message: "Custom message..."
           - must_include:
-              regex: 'type:.+'
-              message: 'Custom message...'
+              regex: "type:.+"
+              message: "Custom message..."
         or:
           - must_include:
-              regex: 'feat|chore|fix'
-              message: 'Custom message...'
+              regex: "feat|chore|fix"
+              message: "Custom message..."
           - must_include:
-              regex: 'major|minor|patch'
-              message: 'Custom message...'
+              regex: "major|minor|patch"
+              message: "Custom message..."
       - do: title
         and:
           - or:
               - must_include:
-                  regex: 'feat|fix|chore'
-                  message: 'Custom message...'
+                  regex: "feat|fix|chore"
+                  message: "Custom message..."
               - must_include:
-                  regex: 'major|minor|patch'
-                  message: 'Custom message...'
+                  regex: "major|minor|patch"
+                  message: "Custom message..."
           - must_include:
               regex: 'ISSUE-\d+'
-              message: 'Custom message...'
+              message: "Custom message..."
 
       - do: and
         validate:
           - do: title
-            begins_with: '[WIP]'
+            begins_with: "[WIP]"
           - do: label
-            must_include: 'Ready to Merge'
+            must_include: "Ready to Merge"
       - do: and
         validate:
           - do: or
             validate:
               - do: title
-                begins_with: 'feat:'
+                begins_with: "feat:"
               - do: label
-                must_include: 'feature'
+                must_include: "feature"
           - do: label
-            must_include: 'Ready to Merge'
+            must_include: "Ready to Merge"
       - do: or
         validate:
           - do: title
-            begins_with: '[WIP]'
+            begins_with: "[WIP]"
           - do: label
-            must_include: 'Ready to Merge'
+            must_include: "Ready to Merge"
       - do: and
         validate:
           - do: or
             validate:
               - do: title
-                begins_with: '[WIP]'
+                begins_with: "[WIP]"
               - do: label
-                must_include: '[WIP]'
+                must_include: "[WIP]"
           - do: label
-            must_include: 'DO NOT MERGE'
+            must_include: "DO NOT MERGE"
       - do: not
         validate:
           - do: title
-            begins_with: '[WIP]'
+            begins_with: "[WIP]"
           - do: label
-            must_include: 'Ready to Merge'
+            must_include: "Ready to Merge"
       - do: and
         validate:
           - do: not
             validate:
               - do: title
-                begins_with: 'feat:'
+                begins_with: "feat:"
               - do: label
-                must_include: 'feature'
+                must_include: "feature"
           - do: label
-            must_include: 'Ready to Merge'
+            must_include: "Ready to Merge"
 
     pass: # list of actions to be executed if all validation passes. Specify one or more. Omit this tag if no actions are needed.
       - do: close
       - do: assign
-        assignees: [ 'shine2lay', 'jusx', '@author' ] # only array accepted, use @author for PR/Issue author
+        assignees: ["shine2lay", "jusx", "@author"] # only array accepted, use @author for PR/Issue author
       - do: checks # default pass case
-        status: 'success' # Can be: success, failure, neutral, cancelled, timed_out, or action_required
+        status: "success" # Can be: success, failure, neutral, cancelled, timed_out, or action_required
         payload:
-          title: 'Mergeable Run have been Completed!'
+          title: "Mergeable Run have been Completed!"
           summary: "All the validators have returned 'pass'! \n Here are some stats of the run: \n {{validationCount}} validations were ran"
       - do: checks # default fail case
-        status: 'failure' # Can be: success, failure, neutral, cancelled, timed_out, or action_required
+        status: "failure" # Can be: success, failure, neutral, cancelled, timed_out, or action_required
         payload:
-          title: 'Mergeable Run have been Completed!'
+          title: "Mergeable Run have been Completed!"
           summary: |
-               ### Status: {{toUpperCase validationStatus}}
-                    Here are some stats of the run:
-                    {{validationCount}} validations were ran.
-                    {{passCount}} PASSED
-                    {{failCount}} FAILED
+            ### Status: {{toUpperCase validationStatus}}
+                 Here are some stats of the run:
+                 {{validationCount}} validations were ran.
+                 {{passCount}} PASSED
+                 {{failCount}} FAILED
           text: "{{#each validationSuites}}\n
-                #### {{{statusIcon status}}} Validator: {{toUpperCase name}}\n
-                {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***\n
-                       Input : {{{details.input}}}\n
-                       Settings : {{{displaySettings details.settings}}}\n
-                       {{/each}}\n
-                {{/each}}"
+            #### {{{statusIcon status}}} Validator: {{toUpperCase name}}\n
+            {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***\n
+            Input : {{{details.input}}}\n
+            Settings : {{{displaySettings details.settings}}}\n
+            {{/each}}\n
+            {{/each}}"
       - do: checks # default error case
-        status: 'action_required' # Can be: success, failure, neutral, cancelled, timed_out, or action_required
+        status: "action_required" # Can be: success, failure, neutral, cancelled, timed_out, or action_required
         payload:
-          title: 'Mergeable found some errors!'
+          title: "Mergeable found some errors!"
           summary: |
-              ### Status: {{toUpperCase validationStatus}}
-              Some or All of the validators have returned 'error' status, please check below for details
-              Here are some stats of the run: \n {{validationCount}} validations were ran.
-              {{passCount}} ***PASSED***
-              {{failCount}} ***FAILED***
-              {{errorCount}} ***ERRORED***
+            ### Status: {{toUpperCase validationStatus}}
+            Some or All of the validators have returned 'error' status, please check below for details
+            Here are some stats of the run: \n {{validationCount}} validations were ran.
+            {{passCount}} ***PASSED***
+            {{failCount}} ***FAILED***
+            {{errorCount}} ***ERRORED***
           text: "{{#each validationSuites}}
-              #### {{{statusIcon status}}} Validator: {{toUpperCase name}}
-              Status {{toUpperCase status}}
-              {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***
-                     Input : {{{details.input}}}
-                     Settings : {{{displaySettings details.settings}}}
-                     {{#if details.error}}
-                     Error : {{{details.error}}}
-                     {{/if}}
-                     {{/each}}
-              {{/each}}"
+            #### {{{statusIcon status}}} Validator: {{toUpperCase name}}
+            Status {{toUpperCase status}}
+            {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***
+            Input : {{{details.input}}}
+            Settings : {{{displaySettings details.settings}}}
+            {{#if details.error}}
+            Error : {{{details.error}}}
+            {{/if}}
+            {{/each}}
+            {{/each}}"
       - do: comment
         payload:
           body: >
             Your very long comment can go here.
         leave_old_comment: true # Optional, by default old comments are deleted, if true, old comments will be left alone
       - do: merge
-        merge_method: 'merge' # Optional, default is 'merge'. Other options : 'rebase', 'squash'
+        merge_method: "merge" # Optional, default is 'merge'. Other options : 'rebase', 'squash'
         # template variables for next two items come from result of https://docs.github.com/en/rest/reference/pulls#get-a-pull-request
         # use triple curly braces to avoid html escaping
-        commit_title: '{{{ title }}} (#{{{ number }}})' # Optional, override commit title
-        commit_message: '{{{ body }}}' # Optional, override commit message
+        commit_title: "{{{ title }}} (#{{{ number }}})" # Optional, override commit title
+        commit_message: "{{{ body }}}" # Optional, override commit message
       - do: labels
-        add: 'Ready for Review'
+        add: "Ready for Review"
       - do: labels
-        delete: [ 'Ready for Review', 'Triage' ]
+        delete: ["Ready for Review", "Triage"]
       - do: labels
-        replace: [ 'Triage', 'Needs Deploy' ]
+        replace: ["Triage", "Needs Deploy"]
       - do: labels
-        replace: [ 'New Task', 'Not Useful' ]
-        add: [ 'Work in Progress', 'Needs Deploy' ]
-        delete: 'Not Useful'
+        replace: ["New Task", "Not Useful"]
+        add: ["Work in Progress", "Needs Deploy"]
+        delete: "Not Useful"
       - do: request_review
-        reviewers: ['name1', 'name2']
-        teams: ['developers'] # team names without organization
+        reviewers: ["name1", "name2"]
+        teams: ["developers"] # team names without organization
 
     fail: # list of actions to be executed when at least one validation fails. Specify one or more. Omit this tag if no actions are needed.
       - do: close
       - do: assign
-        assignees: [ 'shine2lay', 'jusx', '@author' ] # only array accepted, use @author for PR/Issue author
+        assignees: ["shine2lay", "jusx", "@author"] # only array accepted, use @author for PR/Issue author
       - do: checks # default pass case
-        status: 'success' # Can be: success, failure, neutral, cancelled, timed_out, or action_required
+        status: "success" # Can be: success, failure, neutral, cancelled, timed_out, or action_required
         payload:
-          title: 'Mergeable Run have been Completed!'
+          title: "Mergeable Run have been Completed!"
           summary: "All the validators have returned 'pass'! \n Here are some stats of the run: \n {{validationCount}} validations were ran"
       - do: checks # default fail case
-        status: 'failure' # Can be: success, failure, neutral, cancelled, timed_out, or action_required
+        status: "failure" # Can be: success, failure, neutral, cancelled, timed_out, or action_required
         payload:
-          title: 'Mergeable Run have been Completed!'
+          title: "Mergeable Run have been Completed!"
           summary: |
-               ### Status: {{toUpperCase validationStatus}}
-                    Here are some stats of the run:
-                    {{validationCount}} validations were ran.
-                    {{passCount}} PASSED
-                    {{failCount}} FAILED
+            ### Status: {{toUpperCase validationStatus}}
+                 Here are some stats of the run:
+                 {{validationCount}} validations were ran.
+                 {{passCount}} PASSED
+                 {{failCount}} FAILED
           text: "{{#each validationSuites}}\n
-                #### {{{statusIcon status}}} Validator: {{toUpperCase name}}\n
-                {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***\n
-                       Input : {{{details.input}}}\n
-                       Settings : {{{displaySettings details.settings}}}\n
-                       {{/each}}\n
-                {{/each}}"
+            #### {{{statusIcon status}}} Validator: {{toUpperCase name}}\n
+            {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***\n
+            Input : {{{details.input}}}\n
+            Settings : {{{displaySettings details.settings}}}\n
+            {{/each}}\n
+            {{/each}}"
       - do: checks # default error case
-        status: 'action_required' # Can be: success, failure, neutral, cancelled, timed_out, or action_required
+        status: "action_required" # Can be: success, failure, neutral, cancelled, timed_out, or action_required
         payload:
-          title: 'Mergeable found some errors!'
+          title: "Mergeable found some errors!"
           summary: |
-              ### Status: {{toUpperCase validationStatus}}
-              Some or All of the validators have returned 'error' status, please check below for details
-              Here are some stats of the run: \n {{validationCount}} validations were ran.
-              {{passCount}} ***PASSED***
-              {{failCount}} ***FAILED***
-              {{errorCount}} ***ERRORED***
+            ### Status: {{toUpperCase validationStatus}}
+            Some or All of the validators have returned 'error' status, please check below for details
+            Here are some stats of the run: \n {{validationCount}} validations were ran.
+            {{passCount}} ***PASSED***
+            {{failCount}} ***FAILED***
+            {{errorCount}} ***ERRORED***
           text: "{{#each validationSuites}}
-              #### {{{statusIcon status}}} Validator: {{toUpperCase name}}
-              Status {{toUpperCase status}}
-              {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***
-                     Input : {{{details.input}}}
-                     Settings : {{{displaySettings details.settings}}}
-                     {{#if details.error}}
-                     Error : {{{details.error}}}
-                     {{/if}}
-                     {{/each}}
-              {{/each}}"
+            #### {{{statusIcon status}}} Validator: {{toUpperCase name}}
+            Status {{toUpperCase status}}
+            {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***
+            Input : {{{details.input}}}
+            Settings : {{{displaySettings details.settings}}}
+            {{#if details.error}}
+            Error : {{{details.error}}}
+            {{/if}}
+            {{/each}}
+            {{/each}}"
       - do: comment
         payload:
           body: >
             Your very long comment can go here.
         leave_old_comment: true # Optional, by default old comments are deleted, if true, old comments will be left alone
       - do: merge
-        merge_method: 'merge' # Optional, default is 'merge'. Other options : 'rebase', 'squash'
+        merge_method: "merge" # Optional, default is 'merge'. Other options : 'rebase', 'squash'
         # template variables for next two items come from result of https://docs.github.com/en/rest/reference/pulls#get-a-pull-request
         # use triple curly braces to avoid html escaping
-        commit_title: '{{{ title }}} (#{{{ number }}})' # Optional, override commit title
-        commit_message: '{{{ body }}}' # Optional, override commit message
+        commit_title: "{{{ title }}} (#{{{ number }}})" # Optional, override commit title
+        commit_message: "{{{ body }}}" # Optional, override commit message
       - do: labels
-        add: 'Ready for Review'
+        add: "Ready for Review"
       - do: labels
-        delete: [ 'Ready for Review', 'Triage' ]
+        delete: ["Ready for Review", "Triage"]
       - do: labels
-        replace: [ 'Triage', 'Needs Deploy' ]
+        replace: ["Triage", "Needs Deploy"]
       - do: labels
-        replace: [ 'New Task', 'Not Useful' ]
-        add: [ 'Work in Progress', 'Needs Deploy' ]
-        delete: 'Not Useful'
+        replace: ["New Task", "Not Useful"]
+        add: ["Work in Progress", "Needs Deploy"]
+        delete: "Not Useful"
       - do: request_review
-        reviewers: ['name1', 'name2']
-        teams: ['developers'] # team names without organization
+        reviewers: ["name1", "name2"]
+        teams: ["developers"] # team names without organization
 
     error: # list of actions to be executed when at least one validator throws an error. Specify one or more. Omit this tag if no actions are needed.
       - do: close
       - do: assign
-        assignees: [ 'shine2lay', 'jusx', '@author' ] # only array accepted, use @author for PR/Issue author
+        assignees: ["shine2lay", "jusx", "@author"] # only array accepted, use @author for PR/Issue author
       - do: checks # default pass case
-        status: 'success' # Can be: success, failure, neutral, cancelled, timed_out, or action_required
+        status: "success" # Can be: success, failure, neutral, cancelled, timed_out, or action_required
         payload:
-          title: 'Mergeable Run have been Completed!'
+          title: "Mergeable Run have been Completed!"
           summary: "All the validators have returned 'pass'! \n Here are some stats of the run: \n {{validationCount}} validations were ran"
       - do: checks # default fail case
-        status: 'failure' # Can be: success, failure, neutral, cancelled, timed_out, or action_required
+        status: "failure" # Can be: success, failure, neutral, cancelled, timed_out, or action_required
         payload:
-          title: 'Mergeable Run have been Completed!'
+          title: "Mergeable Run have been Completed!"
           summary: |
-               ### Status: {{toUpperCase validationStatus}}
-                    Here are some stats of the run:
-                    {{validationCount}} validations were ran.
-                    {{passCount}} PASSED
-                    {{failCount}} FAILED
+            ### Status: {{toUpperCase validationStatus}}
+                 Here are some stats of the run:
+                 {{validationCount}} validations were ran.
+                 {{passCount}} PASSED
+                 {{failCount}} FAILED
           text: "{{#each validationSuites}}\n
-                #### {{{statusIcon status}}} Validator: {{toUpperCase name}}\n
-                {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***\n
-                       Input : {{{details.input}}}\n
-                       Settings : {{{displaySettings details.settings}}}\n
-                       {{/each}}\n
-                {{/each}}"
+            #### {{{statusIcon status}}} Validator: {{toUpperCase name}}\n
+            {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***\n
+            Input : {{{details.input}}}\n
+            Settings : {{{displaySettings details.settings}}}\n
+            {{/each}}\n
+            {{/each}}"
       - do: checks # default error case
-        status: 'action_required' # Can be: success, failure, neutral, cancelled, timed_out, or action_required
+        status: "action_required" # Can be: success, failure, neutral, cancelled, timed_out, or action_required
         payload:
-          title: 'Mergeable found some errors!'
+          title: "Mergeable found some errors!"
           summary: |
-              ### Status: {{toUpperCase validationStatus}}
-              Some or All of the validators have returned 'error' status, please check below for details
-              Here are some stats of the run: \n {{validationCount}} validations were ran.
-              {{passCount}} ***PASSED***
-              {{failCount}} ***FAILED***
-              {{errorCount}} ***ERRORED***
+            ### Status: {{toUpperCase validationStatus}}
+            Some or All of the validators have returned 'error' status, please check below for details
+            Here are some stats of the run: \n {{validationCount}} validations were ran.
+            {{passCount}} ***PASSED***
+            {{failCount}} ***FAILED***
+            {{errorCount}} ***ERRORED***
           text: "{{#each validationSuites}}
-              #### {{{statusIcon status}}} Validator: {{toUpperCase name}}
-              Status {{toUpperCase status}}
-              {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***
-                     Input : {{{details.input}}}
-                     Settings : {{{displaySettings details.settings}}}
-                     {{#if details.error}}
-                     Error : {{{details.error}}}
-                     {{/if}}
-                     {{/each}}
-              {{/each}}"
+            #### {{{statusIcon status}}} Validator: {{toUpperCase name}}
+            Status {{toUpperCase status}}
+            {{#each validations }} * {{{statusIcon status}}} ***{{{ description }}}***
+            Input : {{{details.input}}}
+            Settings : {{{displaySettings details.settings}}}
+            {{#if details.error}}
+            Error : {{{details.error}}}
+            {{/if}}
+            {{/each}}
+            {{/each}}"
       - do: comment
         payload:
           body: >
             Your very long comment can go here.
         leave_old_comment: true # Optional, by default old comments are deleted, if true, old comments will be left alone
       - do: merge
-        merge_method: 'merge' # Optional, default is 'merge'. Other options : 'rebase', 'squash'
+        merge_method: "merge" # Optional, default is 'merge'. Other options : 'rebase', 'squash'
         # template variables for next two items come from result of https://docs.github.com/en/rest/reference/pulls#get-a-pull-request
         # use triple curly braces to avoid html escaping
-        commit_title: '{{{ title }}} (#{{{ number }}})' # Optional, override commit title
-        commit_message: '{{{ body }}}' # Optional, override commit message
+        commit_title: "{{{ title }}} (#{{{ number }}})" # Optional, override commit title
+        commit_message: "{{{ body }}}" # Optional, override commit message
       - do: labels
-        add: 'Ready for Review'
+        add: "Ready for Review"
       - do: labels
-        delete: [ 'Ready for Review', 'Triage' ]
+        delete: ["Ready for Review", "Triage"]
       - do: labels
-        replace: [ 'Triage', 'Needs Deploy' ]
+        replace: ["Triage", "Needs Deploy"]
       - do: labels
-        replace: [ 'New Task', 'Not Useful' ]
-        add: [ 'Work in Progress', 'Needs Deploy' ]
-        delete: 'Not Useful'
+        replace: ["New Task", "Not Useful"]
+        add: ["Work in Progress", "Needs Deploy"]
+        delete: "Not Useful"
       - do: request_review
-        reviewers: ['name1', 'name2']
-        teams: ['developers'] # team names without organization
-
+        reviewers: ["name1", "name2"]
+        teams: ["developers"] # team names without organization

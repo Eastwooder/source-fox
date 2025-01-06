@@ -1,18 +1,15 @@
 [workspace.package]
-name = "source-fx"
 version = "0.1.0"
 description = "Your smart buddy watching your projects"
 edition = "2021"
 
+[workspace.metadata.crane]
+name = "wild-git-yonder"
+
 [workspace.dependencies]
-tracing = { version = "0.1.40", features = ["attributes", "valuable"] }
-serde = { version = "1.0.204", features = ["derive"] }
+tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
+serde = { version = "1.0.217", features = ["derive"] }
 
 [workspace]
 resolver = "2"
-members = [
-    "github-event-receiver",
-    "mergeable-compatibility-layer",
-    "server",
-    "service-ui"
-]
+members = ["github-event-receiver", "mergeable-compatibility-layer", "server"]
