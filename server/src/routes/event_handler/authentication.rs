@@ -34,7 +34,8 @@ pub trait GitHubAuthenticator {
 }
 
 pub trait InstallationAuthenticator: Clone + Send + Sync {
-    fn for_installation(&self, id: InstallationId) -> impl GitHubActionalbe;
+    type Error: std::error::Error + Send + Sync;
+    fn for_installation(&self, id: InstallationId) -> Result<impl GitHubActionalbe, Self::Error>;
 }
 
 #[derive(Debug, Error)]
@@ -60,7 +61,8 @@ impl GitHubAuthenticator for Octocrab {
 }
 
 impl InstallationAuthenticator for Octocrab {
-    fn for_installation(&self, id: InstallationId) -> impl GitHubActionalbe {
+    type Error = octocrab::Error;
+    fn for_installation(&self, id: InstallationId) -> Result<impl GitHubActionalbe, Self::Error> {
         self.installation(id)
     }
 }

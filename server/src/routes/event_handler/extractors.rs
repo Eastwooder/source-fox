@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use async_trait::async_trait;
 use axum::{
     extract::{FromRequest, FromRequestParts},
     http::{request::Parts, HeaderName},
@@ -38,7 +37,6 @@ impl PartialEq<Tag> for &Sha256VerificationSignature {
     }
 }
 
-#[async_trait]
 impl<S> FromRequestParts<S> for ExtractSignatureHeader
 where
     S: Send + Sync,
@@ -84,7 +82,6 @@ impl IntoResponse for SignatureHeaderError {
 
 pub(crate) struct ExtractGitHubEventHeader(String);
 
-#[async_trait]
 impl<S> FromRequestParts<S> for ExtractGitHubEventHeader
 where
     S: Send + Sync,
@@ -120,7 +117,6 @@ impl IntoResponse for GitHubEventHeaderError {
 
 pub(crate) struct GitHubEvent(pub(crate) WebhookEvent);
 
-#[async_trait]
 impl<S> FromRequest<S> for GitHubEvent
 where
     S: Send + Sync,

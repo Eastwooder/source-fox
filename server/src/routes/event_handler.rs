@@ -3,6 +3,7 @@ use std::sync::Arc;
 use axum::{extract::State, response::IntoResponse, routing::any, Router};
 
 use axum_core::extract::FromRef;
+use hyper::StatusCode;
 use orion::hazardous::mac::hmac::sha256::SecretKey;
 
 use crate::{config::GitHubAppConfiguration, routes::event_handler::remote::GitHubActionalbe};
@@ -62,15 +63,22 @@ async fn handle_github_event<C: InstallationAuthenticator + Clone>(
             octocrab::models::webhook_events::EventInstallation::Full(install) => install.id,
             octocrab::models::webhook_events::EventInstallation::Minimal(mini) => mini.id,
         };
-        let client = client.for_installation(id);
+        let Ok(client) = client.for_installation(id) else {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to authenticate installation",
+            )
+                .into_response();
+        };
         client.post_message();
     }
-    "hello world"
+    (StatusCode::OK, "hello world").into_response()
 }
 
 #[cfg(test)]
 mod test {
     use axum::{body::Body, http::Request};
+    use futures_util::never::Never;
     use http_body_util::BodyExt;
     use hyper::{StatusCode, Uri};
     use orion::hazardous::mac::hmac::sha256::{HmacSha256, SecretKey};
@@ -111,8 +119,12 @@ mod test {
     }
 
     impl InstallationAuthenticator for TestClient {
-        fn for_installation(&self, _id: octocrab::models::InstallationId) -> impl GitHubActionalbe {
-            NoOpActionable
+        type Error = Never;
+        fn for_installation(
+            &self,
+            _id: octocrab::models::InstallationId,
+        ) -> Result<impl GitHubActionalbe, Self::Error> {
+            Ok(NoOpActionable)
         }
     }
 
