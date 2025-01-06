@@ -16,19 +16,19 @@ jobs:
       packages: write
     steps:
       - name: Checkout Source Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Log into registry ${{ env.REGISTRY }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup nix
-        uses: cachix/install-nix-action@v22
+        uses: cachix/install-nix-action@v27
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Use cachix binary cache
-        uses: cachix/cachix-action@v12
+        uses: cachix/cachix-action@v15
         with:
           name: wild-git-yonder
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
