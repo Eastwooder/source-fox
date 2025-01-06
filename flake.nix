@@ -130,6 +130,14 @@
               partitionType = "count";
               cargoNextestPartitionsExtraArgs = "--no-tests=pass";
             });
+            # Audit dependencies
+            my-workspace-audit = craneLib.cargoAudit {
+              inherit src advisory-db;
+            };
+            # Audit licenses
+            my-workspace-deny = craneLib.cargoDeny {
+              inherit src;
+            };
             # pre-commit-checks to be installed for the dev environment
             pre-commit-check = pre-commit-hooks.lib.${system}.run {
               src = ./.;
@@ -176,6 +184,7 @@
               cargo-edit # cargo extension for easier management of dependencies in the style of `cargo [rm|upgrade|set-version]`
               cargo-nextest # nextest runner
               cargo-deny # deny licenses
+              cargo-audit # audit checks
 
               bacon # background code checker
             ] ++ scripts;
