@@ -2,6 +2,7 @@
 version = "0.1.0"
 description = "Your smart buddy watching your projects"
 edition = "2021"
+license = "MIT or Apache-2.0"
 
 [workspace.metadata.crane]
 name = "wild-git-yonder"
