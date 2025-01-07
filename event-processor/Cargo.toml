@@ -6,3 +6,9 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+allocative = "0.3.4"
+starlark = "0.13.0"
+indoc.workspace = true
+
+[lints.clippy]
+needless_lifetimes = "allow"
