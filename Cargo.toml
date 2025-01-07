@@ -13,4 +13,4 @@ serde = { version = "1.0.217", features = ["derive"] }
 
 [workspace]
 resolver = "2"
-members = ["github-event-receiver", "mergeable-compatibility-layer", "server"]
+members = [ "event-processor","github-event-receiver", "mergeable-compatibility-layer", "server"]

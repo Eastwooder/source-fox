@@ -71,6 +71,7 @@
               ./Cargo.lock
               (craneLib.fileset.commonCargoSources ./github-event-receiver)
               (craneLib.fileset.commonCargoSources ./mergeable-compatibility-layer)
+              (craneLib.fileset.commonCargoSources ./event-processor)
               (craneLib.fileset.commonCargoSources crate)
             ];
           };

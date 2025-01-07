@@ -1,7 +1,8 @@
 [package]
 name = "github-event-receiver"
-version = { workspace = true }
-edition = { workspace = true }
-license = { workspace = true }
+version.workspace = true
+description.workspace = true
+edition.workspace = true
+license.workspace = true
 
 [dependencies]
