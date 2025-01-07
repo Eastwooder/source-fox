@@ -6,49 +6,38 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
-axum = { version = "0.8.1", features = ["tracing", "macros"] }
-axum-core = "0.5.0"
-base64 = "0.22.1"
-bytes = "1.9.0"
-const_format = "0.2.34"
-envious = "0.2.2"
-futures-util = "0.3.31"
-hex = "0.4.3"
-http-body-util = "0.1.2"
-hyper = "1.5.2"
-hyper-rustls = { version = "0.27.5", optional = true }
-jsonwebtoken = "9.3.0"
-metrics = { version = "0.24.1", default-features = false }
-metrics-exporter-prometheus = { version = "0.16.0", default-features = false }
-octocrab = { version = "0.42.1", features = [
-    "hyper-tls",
-    "rustls-webpki-tokio",
-] }
-orion = "0.17.7"
-rand = "0.8.5"
-rand_chacha = "0.3.1"
-rsa = { version = "0.9.7", features = ["pem"] }
-rustls = "0.23.20"
-secrecy = { version = "0.10.3" }
-serde = { workspace = true, features = ["derive"] }
-serde_json = "1.0.134"
-thiserror = "2.0.9"
-tokio = { version = "1.42.0", features = ["full", "tracing"] }
-tower = "0.5.2"
-tower-http = "0.6.2"
-tracing = { workspace = true }
-tracing-subscriber = { version = "0.3.19", features = [
-    "env-filter",
-    "json",
-    "local-time",
-] }
+axum.workspace = true
+axum-core.workspace = true
+base64.workspace = true
+bytes.workspace = true
+envious.workspace = true
+futures-util.workspace = true
+hex.workspace = true
+http-body-util.workspace = true
+hyper.workspace = true
+hyper-rustls = { workspace = true, optional = true }
+jsonwebtoken.workspace = true
+metrics.workspace = true
+metrics-exporter-prometheus.workspace = true
+octocrab.workspace = true
+orion.workspace = true
+rand.workspace = true
+rand_chacha.workspace = true
+rsa.workspace = true
+rustls.workspace = true
+secrecy.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
 
 [dev-dependencies]
-tracing-test = "0.2.5"
-http-body-util = "0.1.2"
+tracing-test.workspace = true
+http-body-util.workspace = true
 
 [features]
 hyper-rustls = ["dep:hyper-rustls"]
-
-[package.metadata.cargo-udeps.ignore]
-normal = ["const_format"]

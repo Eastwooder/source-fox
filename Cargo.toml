@@ -7,10 +7,57 @@ license = "MIT or Apache-2.0"
 [workspace.metadata.crane]
 name = "wild-git-yonder"
 
-[workspace.dependencies]
-tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
-serde = { version = "1.0.217", features = ["derive"] }
-
 [workspace]
 resolver = "2"
-members = [ "event-processor","github-event-receiver", "mergeable-compatibility-layer", "server"]
+members = [
+    "event-processor",
+    "github-event-receiver",
+    "mergeable-compatibility-layer",
+    "server",
+]
+
+[workspace.dependencies]
+# serialize and deserialize data
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.134"
+serde_yaml = "0.9.34"
+# define error types
+thiserror = "2.0.9"
+# tracing and logging
+tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
+tracing-subscriber = { version = "0.3.19", features = [
+    "env-filter",
+    "json",
+    "local-time",
+] }
+# async
+futures-util = "0.3.31"
+tokio = { version = "1.42.0", features = ["full", "tracing"] }
+# web stack
+axum = { version = "0.8.1", features = ["tracing", "macros"] }
+axum-core = "0.5.0"
+tower = "0.5.2"
+tower-http = "0.6.2"
+metrics = { version = "0.24.1", default-features = false }
+metrics-exporter-prometheus = { version = "0.16.0", default-features = false }
+hyper = "1.5.2"
+hyper-rustls = { version = "0.27.5" }
+http-body-util = "0.1.2"
+rustls = "0.23.20"
+# libraries
+base64 = "0.22.1"
+bytes = "1.9.0"
+envious = "0.2.2"
+hex = "0.4.3"
+jsonwebtoken = "9.3.0"
+octocrab = { version = "0.42.1", features = [
+    "hyper-tls",
+    "rustls-webpki-tokio",
+] }
+orion = "0.17.7"
+rand = "0.8.5"
+rand_chacha = "0.3.1"
+rsa = { version = "0.9.7", features = ["pem"] }
+secrecy = "0.10.3"
+# test
+tracing-test = "0.2.5"
