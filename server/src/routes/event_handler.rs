@@ -1,19 +1,20 @@
 use std::sync::Arc;
 
-use axum::{extract::State, response::IntoResponse, routing::any, Router};
-
-use axum_core::extract::FromRef;
-use hyper::StatusCode;
-use octocrab::models::webhook_events::EventInstallation;
-use orion::hazardous::mac::hmac::sha256::SecretKey;
-
 use crate::config::GitHubAppConfiguration;
+use axum::http::Uri;
+use axum::{extract::State, response::IntoResponse, routing::any, Router};
+use axum_core::extract::FromRef;
+use github_event_handler::authentication::{
+    AuthenticatedClient, GitHubAppAuthenticator, InstallationAuthenticator,
+};
+use github_event_handler::handle::{handle_event, HandleEventError};
+use hyper::StatusCode;
+use jsonwebtoken::EncodingKey;
+use octocrab::models::AppId;
+use orion::hazardous::mac::hmac::sha256::SecretKey;
 
 use self::extractors::GitHubEvent;
 
-pub use authentication::{AuthenticatedClient, GitHubAppAuthenticator, InstallationAuthenticator};
-
-mod authentication;
 mod extractors;
 
 pub async fn router<C: GitHubAppAuthenticator>(
@@ -23,9 +24,7 @@ where
     C::Error: 'static,
     C::Next: 'static,
 {
-    let client =
-        authentication::authenticate_app::<C>(config.uri, config.app_identifier, config.app_key)
-            .await?;
+    let client = authenticate_app::<C>(config.uri, config.app_identifier, config.app_key).await?;
     let signature_config = ConfigState {
         webhook_secret: config.webhook_secret.into(),
         client,
@@ -54,38 +53,58 @@ impl<C: InstallationAuthenticator + Clone> FromRef<ConfigState<C>> for Authentic
     }
 }
 
+async fn authenticate_app<C: GitHubAppAuthenticator>(
+    github_uri: Uri,
+    app_id: AppId,
+    app_key: EncodingKey,
+) -> Result<AuthenticatedClient<C::Next>, C::Error> {
+    let client = C::authenticate_app(github_uri, app_id, app_key)?;
+    Ok(AuthenticatedClient { client })
+}
+
 async fn handle_github_event<C: InstallationAuthenticator + Clone>(
     State(AuthenticatedClient { client }): State<AuthenticatedClient<C>>,
     GitHubEvent(event): GitHubEvent,
 ) -> impl IntoResponse {
-    let id = match event.installation {
-        Some(EventInstallation::Full(ref installation)) => installation.id,
-        Some(EventInstallation::Minimal(ref installation)) => installation.id,
-        None => return (StatusCode::BAD_REQUEST, "missing installation id").into_response(),
-    };
-    let client = match client.for_installation(id).await {
-        Ok(client) => client,
-        Err(_) => {
-            return (
+    let handle_err = |err: HandleEventError| {
+        tracing::error!(%err, "failed to handle event");
+        match err {
+            HandleEventError::MissingInstallation => (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "unable to authenticate installation",
+                "missing installation in the event",
             )
-                .into_response()
+                .into_response(),
+            HandleEventError::InstallationAuthentication { .. } => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "unable to access installation",
+            )
+                .into_response(),
+            HandleEventError::MissingRepository => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "missing repository parent in the event",
+            )
+                .into_response(),
+            HandleEventError::EventHandling { event, .. } => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("failed to handle event: {:?}", event),
+            )
+                .into_response(),
         }
     };
-    if let Err(err) = github_event_handler::handle_event(client, event).await {
-        tracing::error!(%err, "failed to handle event");
-        return (StatusCode::INTERNAL_SERVER_ERROR, "failed to handle event").into_response();
+    match handle_event(client, event).await {
+        Ok(Some(res)) => (StatusCode::OK, res).into_response(),
+        Ok(None) => (StatusCode::NO_CONTENT).into_response(),
+        Err(err) => handle_err(err).into_response(),
     }
-    (StatusCode::OK, "hello world").into_response()
 }
 
 #[cfg(test)]
 mod test {
+    use super::{GitHubAppAuthenticator, InstallationAuthenticator};
     use crate::config::GitHubAppConfiguration;
     use axum::{body::Body, http::Request};
     use futures_util::never::Never;
-    use github_event_handler::GitHubApi;
+    use github_event_handler::api::GitHubApi;
     use http_body_util::BodyExt;
     use hyper::{StatusCode, Uri};
     use octocrab::models::Repository;
@@ -94,8 +113,6 @@ mod test {
     use serde_json::json;
     use thiserror::Error;
     use tower::ServiceExt;
-
-    use super::{GitHubAppAuthenticator, InstallationAuthenticator};
 
     #[derive(Clone)]
     struct TestClient;
@@ -147,14 +164,15 @@ mod test {
                     "id": 1,
                     "node_id": "dGVzdA=="
                 },
-                "hello": "world"
+                "hello": "world",
+                "zen": "Half measures are as bad as nothing at all."
             }
         ))
         .unwrap();
         let body_hmac = calc_hmac_for_body(&secret, &body);
         let request = Request::builder()
             .uri("/event_handler")
-            .header("X-GitHub-Event", "pull_request.*")
+            .header("X-GitHub-Event", "ping")
             .header("x-hub-signature-256", format!("sha256={body_hmac}"))
             .body(Body::from(body))
             .unwrap();
@@ -162,7 +180,6 @@ mod test {
 
         let (parts, body) = response.into_parts();
         let body = body.collect().await.unwrap().to_bytes();
-        // let body: serde_json::Value = str::get(&body).unwrap();
         tracing::info!(?body);
         assert_eq!(parts.status, StatusCode::OK);
     }

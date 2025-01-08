@@ -10,3 +10,5 @@ octocrab.workspace = true
 tracing.workspace = true
 snafu.workspace = true
 indoc.workspace = true
+hyper.workspace = true
+jsonwebtoken.workspace = true

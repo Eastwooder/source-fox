@@ -5,7 +5,7 @@ use std::net::SocketAddr;
 
 use axum::{middleware::from_fn, Router};
 use config::GitHubAppConfiguration;
-use routes::event_handler::GitHubAppAuthenticator;
+use github_event_handler::authentication::GitHubAppAuthenticator;
 pub use routes::metrics::track_metrics;
 use tokio::net::TcpListener;
 

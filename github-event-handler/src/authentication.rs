@@ -1,21 +1,13 @@
-use github_event_handler::GitHubApi;
+use crate::api::GitHubApi;
 use hyper::http::Uri;
 use jsonwebtoken::EncodingKey;
 use octocrab::{
     models::{AppId, InstallationId},
     Octocrab,
 };
+use snafu::{ResultExt, Snafu};
+use std::fmt::Debug;
 use std::future::Future;
-use thiserror::Error;
-
-pub async fn authenticate_app<C: GitHubAppAuthenticator>(
-    github_uri: Uri,
-    app_id: AppId,
-    app_key: EncodingKey,
-) -> Result<AuthenticatedClient<C::Next>, C::Error> {
-    let client = C::authenticate_app(github_uri, app_id, app_key)?;
-    Ok(AuthenticatedClient { client })
-}
 
 #[derive(Clone)]
 pub struct AuthenticatedClient<C: InstallationAuthenticator> {
@@ -34,17 +26,17 @@ pub trait GitHubAppAuthenticator {
 }
 
 pub trait InstallationAuthenticator: Clone + Send + Sync {
-    type Error: std::error::Error + Send + Sync;
+    type Error: std::error::Error + Send + Sync + Debug + 'static;
     fn for_installation(
         &self,
         id: InstallationId,
     ) -> impl Future<Output = Result<impl GitHubApi, Self::Error>> + Send;
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Snafu)]
 pub enum OctocrabAuthenticationError {
-    #[error("Error whilst creating the authentication: {0}")]
-    Octocrab(#[from] octocrab::Error),
+    #[snafu(display("Error whilst creating the authentication: {source}"))]
+    Octocrab { source: octocrab::Error },
 }
 
 impl GitHubAppAuthenticator for Octocrab {
@@ -56,10 +48,12 @@ impl GitHubAppAuthenticator for Octocrab {
         app_id: AppId,
         app_key: EncodingKey,
     ) -> Result<Self::Next, Self::Error> {
-        Ok(Octocrab::builder()
-            .base_uri(base_uri)?
+        Octocrab::builder()
+            .base_uri(base_uri)
+            .context(OctocrabSnafu)?
             .app(app_id, app_key)
-            .build()?)
+            .build()
+            .context(OctocrabSnafu)
     }
 }
 
