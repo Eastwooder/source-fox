@@ -4,19 +4,19 @@ use axum::{extract::State, response::IntoResponse, routing::any, Router};
 
 use axum_core::extract::FromRef;
 use hyper::StatusCode;
+use octocrab::models::webhook_events::EventInstallation;
 use orion::hazardous::mac::hmac::sha256::SecretKey;
 
-use crate::{config::GitHubAppConfiguration, routes::event_handler::remote::GitHubActionalbe};
+use crate::config::GitHubAppConfiguration;
 
 use self::extractors::GitHubEvent;
 
-pub use authentication::{AuthenticatedClient, GitHubAuthenticator, InstallationAuthenticator};
+pub use authentication::{AuthenticatedClient, GitHubAppAuthenticator, InstallationAuthenticator};
 
 mod authentication;
 mod extractors;
-mod remote;
 
-pub fn router<C: GitHubAuthenticator>(
+pub async fn router<C: GitHubAppAuthenticator>(
     config: GitHubAppConfiguration,
 ) -> Result<Router, Box<dyn std::error::Error>>
 where
@@ -24,7 +24,8 @@ where
     C::Next: 'static,
 {
     let client =
-        authentication::authenticate::<C>(config.uri, config.app_identifier, config.app_key)?;
+        authentication::authenticate_app::<C>(config.uri, config.app_identifier, config.app_key)
+            .await?;
     let signature_config = ConfigState {
         webhook_secret: config.webhook_secret.into(),
         client,
@@ -57,39 +58,44 @@ async fn handle_github_event<C: InstallationAuthenticator + Clone>(
     State(AuthenticatedClient { client }): State<AuthenticatedClient<C>>,
     GitHubEvent(event): GitHubEvent,
 ) -> impl IntoResponse {
-    tracing::error!(kind = ?event, "logic starts now");
-    if let Some(t) = event.installation {
-        let id = match t {
-            octocrab::models::webhook_events::EventInstallation::Full(install) => install.id,
-            octocrab::models::webhook_events::EventInstallation::Minimal(mini) => mini.id,
-        };
-        let Ok(client) = client.for_installation(id) else {
+    let id = match event.installation {
+        Some(EventInstallation::Full(ref installation)) => installation.id,
+        Some(EventInstallation::Minimal(ref installation)) => installation.id,
+        None => return (StatusCode::BAD_REQUEST, "missing installation id").into_response(),
+    };
+    let client = match client.for_installation(id).await {
+        Ok(client) => client,
+        Err(_) => {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "Failed to authenticate installation",
+                "unable to authenticate installation",
             )
-                .into_response();
-        };
-        client.post_message();
+                .into_response()
+        }
+    };
+    if let Err(err) = github_event_handler::handle_event(client, event).await {
+        tracing::error!(%err, "failed to handle event");
+        return (StatusCode::INTERNAL_SERVER_ERROR, "failed to handle event").into_response();
     }
     (StatusCode::OK, "hello world").into_response()
 }
 
 #[cfg(test)]
 mod test {
+    use crate::config::GitHubAppConfiguration;
     use axum::{body::Body, http::Request};
     use futures_util::never::Never;
+    use github_event_handler::GitHubApi;
     use http_body_util::BodyExt;
     use hyper::{StatusCode, Uri};
+    use octocrab::models::Repository;
     use orion::hazardous::mac::hmac::sha256::{HmacSha256, SecretKey};
     use rsa::RsaPublicKey;
     use serde_json::json;
     use thiserror::Error;
     use tower::ServiceExt;
 
-    use crate::config::GitHubAppConfiguration;
-
-    use super::{remote::GitHubActionalbe, GitHubAuthenticator, InstallationAuthenticator};
+    use super::{GitHubAppAuthenticator, InstallationAuthenticator};
 
     #[derive(Clone)]
     struct TestClient;
@@ -97,15 +103,16 @@ mod test {
     #[derive(Debug, Error)]
     enum TestError {}
 
-    struct NoOpActionable;
+    struct NoOpApi;
 
-    impl GitHubActionalbe for NoOpActionable {
-        fn post_message(&self) {
-            todo!()
+    impl GitHubApi for NoOpApi {
+        #[allow(refining_impl_trait)]
+        async fn create_commit_status(&self, _: &Repository, _: &str) -> Result<(), TestError> {
+            Ok(())
         }
     }
 
-    impl GitHubAuthenticator for TestClient {
+    impl GitHubAppAuthenticator for TestClient {
         type Next = TestClient;
         type Error = TestError;
 
@@ -120,11 +127,11 @@ mod test {
 
     impl InstallationAuthenticator for TestClient {
         type Error = Never;
-        fn for_installation(
+        async fn for_installation(
             &self,
             _id: octocrab::models::InstallationId,
-        ) -> Result<impl GitHubActionalbe, Self::Error> {
-            Ok(NoOpActionable)
+        ) -> Result<impl GitHubApi, Self::Error> {
+            Ok(NoOpApi)
         }
     }
 
@@ -132,9 +139,18 @@ mod test {
     #[tokio::test]
     async fn test_happy_path() {
         let (config, _, secret) = create_test_config();
-        let app = super::router::<TestClient>(config).unwrap();
+        let app = super::router::<TestClient>(config).await.unwrap();
 
-        let body = serde_json::to_vec(&json!({"hello": "world"})).unwrap();
+        let body = serde_json::to_vec(&json!(
+            {
+                "installation": {
+                    "id": 1,
+                    "node_id": "dGVzdA=="
+                },
+                "hello": "world"
+            }
+        ))
+        .unwrap();
         let body_hmac = calc_hmac_for_body(&secret, &body);
         let request = Request::builder()
             .uri("/event_handler")
@@ -155,7 +171,7 @@ mod test {
     #[tokio::test]
     async fn test_missing_signature() {
         let (config, _, _) = create_test_config();
-        let app = super::router::<TestClient>(config).unwrap();
+        let app = super::router::<TestClient>(config).await.unwrap();
 
         let body = serde_json::to_vec(&json!({"hello": "world"})).unwrap();
         let request = Request::builder()
@@ -172,7 +188,7 @@ mod test {
     #[tokio::test]
     async fn test_wrong_signature() {
         let (config, _, _) = create_test_config();
-        let app = super::router::<TestClient>(config).unwrap();
+        let app = super::router::<TestClient>(config).await.unwrap();
 
         let body = serde_json::to_vec(&json!({"hello": "world"})).unwrap();
         let request = Request::builder()

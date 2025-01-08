@@ -11,7 +11,7 @@ name = "wild-git-yonder"
 resolver = "2"
 members = [
     "event-processor",
-    "github-event-receiver",
+    "github-event-handler",
     "mergeable-compatibility-layer",
     "server",
 ]
@@ -23,6 +23,7 @@ serde_json = "1.0.134"
 serde_yaml = "0.9.34"
 # define error types
 thiserror = "2.0.9"
+snafu = { version = "0.8.5", features = ["backtrace"] }
 # tracing and logging
 tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
 tracing-subscriber = { version = "0.3.19", features = [
@@ -45,7 +46,6 @@ hyper-rustls = { version = "0.27.5" }
 http-body-util = "0.1.2"
 rustls = "0.23.20"
 # libraries
-indoc = "2.0.5"
 base64 = "0.22.1"
 bytes = "1.9.0"
 envious = "0.2.2"
@@ -60,5 +60,8 @@ rand = "0.8.5"
 rand_chacha = "0.3.1"
 rsa = { version = "0.9.7", features = ["pem"] }
 secrecy = "0.10.3"
+# compile time macro helpers
+indoc = "2.0.5"
+const_format = "0.2.34"
 # test
 tracing-test = "0.2.5"

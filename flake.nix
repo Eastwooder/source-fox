@@ -69,7 +69,7 @@
             fileset = pkgs.lib.fileset.unions [
               ./Cargo.toml
               ./Cargo.lock
-              (craneLib.fileset.commonCargoSources ./github-event-receiver)
+              (craneLib.fileset.commonCargoSources ./github-event-handler)
               (craneLib.fileset.commonCargoSources ./mergeable-compatibility-layer)
               (craneLib.fileset.commonCargoSources ./event-processor)
               (craneLib.fileset.commonCargoSources crate)

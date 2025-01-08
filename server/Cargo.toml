@@ -6,6 +6,7 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+github-event-handler = { path = "../github-event-handler" }
 axum.workspace = true
 axum-core.workspace = true
 base64.workspace = true
@@ -24,7 +25,6 @@ orion.workspace = true
 rand.workspace = true
 rand_chacha.workspace = true
 rsa.workspace = true
-rustls.workspace = true
 secrecy.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -34,6 +34,7 @@ tower.workspace = true
 tower-http.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
+const_format.workspace = true
 
 [dev-dependencies]
 tracing-test.workspace = true

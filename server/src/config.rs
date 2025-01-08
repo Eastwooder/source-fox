@@ -9,13 +9,9 @@ use thiserror::Error;
 pub fn load_github_app_config() -> Result<GitHubAppConfiguration, ConfigurationError> {
     #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
     struct ApplicationRawConfig {
-        #[serde(default)]
         github_private_key: String,
-        #[serde(default)]
         github_webhook_secret: String,
-        #[serde(default)]
         github_app_identifier: u64,
-        #[serde(default)]
         github_uri: String,
     }
 

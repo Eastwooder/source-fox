@@ -1,14 +1,14 @@
+use github_event_handler::GitHubApi;
 use hyper::http::Uri;
 use jsonwebtoken::EncodingKey;
 use octocrab::{
     models::{AppId, InstallationId},
     Octocrab,
 };
+use std::future::Future;
 use thiserror::Error;
 
-use super::remote::GitHubActionalbe;
-
-pub fn authenticate<C: GitHubAuthenticator>(
+pub async fn authenticate_app<C: GitHubAppAuthenticator>(
     github_uri: Uri,
     app_id: AppId,
     app_key: EncodingKey,
@@ -22,7 +22,7 @@ pub struct AuthenticatedClient<C: InstallationAuthenticator> {
     pub client: C,
 }
 
-pub trait GitHubAuthenticator {
+pub trait GitHubAppAuthenticator {
     type Next: InstallationAuthenticator + Send + Sync;
     type Error: std::error::Error + Sync + Send;
 
@@ -35,7 +35,10 @@ pub trait GitHubAuthenticator {
 
 pub trait InstallationAuthenticator: Clone + Send + Sync {
     type Error: std::error::Error + Send + Sync;
-    fn for_installation(&self, id: InstallationId) -> Result<impl GitHubActionalbe, Self::Error>;
+    fn for_installation(
+        &self,
+        id: InstallationId,
+    ) -> impl Future<Output = Result<impl GitHubApi, Self::Error>> + Send;
 }
 
 #[derive(Debug, Error)]
@@ -44,7 +47,7 @@ pub enum OctocrabAuthenticationError {
     Octocrab(#[from] octocrab::Error),
 }
 
-impl GitHubAuthenticator for Octocrab {
+impl GitHubAppAuthenticator for Octocrab {
     type Next = Octocrab;
     type Error = OctocrabAuthenticationError;
 
@@ -62,7 +65,7 @@ impl GitHubAuthenticator for Octocrab {
 
 impl InstallationAuthenticator for Octocrab {
     type Error = octocrab::Error;
-    fn for_installation(&self, id: InstallationId) -> Result<impl GitHubActionalbe, Self::Error> {
-        self.installation(id)
+    async fn for_installation(&self, id: InstallationId) -> Result<impl GitHubApi, Self::Error> {
+        self.installation_and_token(id).await.map(|r| r.0)
     }
 }

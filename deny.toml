@@ -12,19 +12,8 @@ confidence-threshold = 0.8
 # aren't accepted for every possible crate as with the normal allow list
 exceptions = [
     { allow = [
-        "ISC",
-        "OpenSSL",
-    ], crate = "aws-lc-rs" },
-    { allow = [
         "OpenSSL",
     ], name = "ring" },
-    { allow = [
-        "ISC",
-        "OpenSSL",
-    ], crate = "aws-lc-sys" },
-    { allow = [
-        "BSD-3-Clause",
-    ], crate = "bindgen" },
     { allow = [
         "BSD-3-Clause",
     ], crate = "matchit" },
@@ -34,6 +23,18 @@ exceptions = [
     { allow = [
         "MPL-2.0",
     ], crate = "webpki-roots" },
+    { allow = [
+        "CC0-1.0",
+    ], crate = "tiny-keccak" },
+    { allow = [
+        "BSL-1.0",
+    ], crate = "error-code" },
+    { allow = [
+        "BSL-1.0",
+    ], crate = "clipboard-win" },
+    { allow = [
+        "BSD-2-Clause",
+    ], crate = "Inflector" },
 ]
 [[licenses.clarify]]
 name = "ring"

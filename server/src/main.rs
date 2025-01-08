@@ -7,7 +7,8 @@ use server::config::{load_github_app_config, GitHubAppConfiguration};
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     setup_tracing()?;
-    let app_config = load_github_app_config().unwrap_or(create_dummy_config());
+    setup_crypto()?;
+    let app_config = load_github_app_config()?; //.unwrap_or(create_dummy_config());
 
     tokio::try_join!(
         server::public_app::<Octocrab>(app_config),
@@ -27,6 +28,11 @@ fn setup_tracing() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn setup_crypto() -> Result<(), Box<dyn std::error::Error>> {
+    Ok(())
+}
+
+#[allow(dead_code)]
 fn create_dummy_config() -> GitHubAppConfiguration {
     let secret = SecretKey::from_slice(&[0; 32]).unwrap();
     GitHubAppConfiguration {
