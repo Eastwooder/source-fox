@@ -1,4 +1,0 @@
-{
-    "rust-analyzer.trace.extension": true,
-    "nixEnvSelector.nixFile": "${workspaceRoot}/default.nix"
-}
