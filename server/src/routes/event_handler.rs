@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use self::extractors::GitHubEvent;
 use crate::config::GitHubAppConfiguration;
 use axum::http::Uri;
 use axum::{extract::State, response::IntoResponse, routing::any, Router};
@@ -12,8 +13,6 @@ use hyper::StatusCode;
 use jsonwebtoken::EncodingKey;
 use octocrab::models::AppId;
 use orion::hazardous::mac::hmac::sha256::SecretKey;
-
-use self::extractors::GitHubEvent;
 
 mod extractors;
 

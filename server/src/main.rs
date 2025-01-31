@@ -2,17 +2,19 @@ use hyper::Uri;
 use jsonwebtoken::EncodingKey;
 use octocrab::{models::AppId, Octocrab};
 use orion::hazardous::mac::hmac::sha256::SecretKey;
+use rand_chacha::ChaCha20Rng;
+use rsa::RsaPrivateKey;
 use server::config::{load_github_app_config, GitHubAppConfiguration};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     setup_tracing()?;
     setup_crypto()?;
-    let app_config = load_github_app_config()?; //.unwrap_or(create_dummy_config());
+    let (app_config, public_ep, internal_ep) = load_github_app_config()?; //.unwrap_or(create_dummy_config());
 
     tokio::try_join!(
-        server::public_app::<Octocrab>(app_config),
-        server::internal_app()
+        server::public_app::<Octocrab>(app_config, public_ep),
+        server::internal_app(internal_ep)
     )?;
     Ok(())
 }
@@ -42,10 +44,9 @@ fn create_dummy_config() -> GitHubAppConfiguration {
             use rand::SeedableRng;
             use rsa::pkcs8::EncodePrivateKey;
             // let mut rng = rand::thread_rng();
-            let mut rng = rand_chacha::ChaCha20Rng::seed_from_u64(17_832_551);
+            let mut rng = ChaCha20Rng::seed_from_u64(17_832_551);
             let bits = 2048;
-            let priv_key =
-                rsa::RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
+            let priv_key = RsaPrivateKey::new(&mut rng, bits).expect("failed to generate a key");
             let _pub_key = rsa::RsaPublicKey::from(&priv_key);
 
             let der_encoded_key = priv_key.to_pkcs8_pem(rsa::pkcs8::LineEnding::LF).unwrap();

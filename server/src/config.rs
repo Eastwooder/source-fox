@@ -4,15 +4,25 @@ use hyper::Uri;
 use jsonwebtoken::EncodingKey;
 use octocrab::models::AppId;
 use orion::{errors::UnknownCryptoError, hazardous::mac::hmac::sha256::SecretKey};
+use std::net::{IpAddr, SocketAddr};
 use thiserror::Error;
 
-pub fn load_github_app_config() -> Result<GitHubAppConfiguration, ConfigurationError> {
+pub fn load_github_app_config() -> Result<
+    (
+        GitHubAppConfiguration,
+        PublicEndpointConfiguration,
+        InternalEndpointConfiguration,
+    ),
+    ConfigurationError,
+> {
     #[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
     struct ApplicationRawConfig {
         github_private_key: String,
         github_webhook_secret: String,
         github_app_identifier: u64,
         github_uri: String,
+        public_addr: Option<SocketAddr>,
+        internal_addr: Option<SocketAddr>,
     }
 
     let raw_config: ApplicationRawConfig = {
@@ -26,12 +36,23 @@ pub fn load_github_app_config() -> Result<GitHubAppConfiguration, ConfigurationE
     let app_key = EncodingKey::from_rsa_pem(raw_config.github_private_key.as_bytes())?;
     let uri = Uri::try_from(raw_config.github_uri)?;
 
-    Ok(GitHubAppConfiguration {
+    let app_config = GitHubAppConfiguration {
         webhook_secret,
         app_identifier,
         app_key,
         uri,
-    })
+    };
+    let public_ep_config = PublicEndpointConfiguration {
+        addr: raw_config
+            .public_addr
+            .unwrap_or(SocketAddr::new(IpAddr::from([0, 0, 0, 0]), 3000)),
+    };
+    let internal_ep_config = InternalEndpointConfiguration {
+        addr: raw_config
+            .internal_addr
+            .unwrap_or(SocketAddr::new(IpAddr::from([0, 0, 0, 0]), 3001)),
+    };
+    Ok((app_config, public_ep_config, internal_ep_config))
 }
 
 pub struct GitHubAppConfiguration {
@@ -39,6 +60,16 @@ pub struct GitHubAppConfiguration {
     pub app_identifier: AppId,
     pub app_key: EncodingKey,
     pub uri: Uri,
+}
+
+#[derive(Debug)]
+pub struct PublicEndpointConfiguration {
+    pub addr: SocketAddr,
+}
+
+#[derive(Debug)]
+pub struct InternalEndpointConfiguration {
+    pub addr: SocketAddr,
 }
 
 #[derive(Debug, Error)]

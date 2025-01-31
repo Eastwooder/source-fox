@@ -39,6 +39,14 @@ where
         }
         WebhookEventPayload::Push(_) => Ok(None),
         WebhookEventPayload::CheckRun(_) => Ok(None),
+        WebhookEventPayload::CheckSuite(check) => {
+            let Some(_repository) = event.repository else {
+                return MissingRepositorySnafu.fail();
+            };
+            // TODO: need to parse check.check_suite or check.enterprise as it's currently just a json object
+            tracing::debug!(check_suite = ?check, "handling check suite");
+            Ok(None)
+        }
         _ => {
             tracing::debug!(kind = ?event.kind, "unhandled event");
             Ok(None)
