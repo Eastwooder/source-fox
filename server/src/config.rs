@@ -10,7 +10,7 @@ use thiserror::Error;
 pub fn load_github_app_config() -> Result<
     (
         GitHubAppConfiguration,
-        PublicEndpointConfiguration,
+        WebhookEndpointConfiguration,
         InternalEndpointConfiguration,
     ),
     ConfigurationError,
@@ -21,7 +21,8 @@ pub fn load_github_app_config() -> Result<
         github_webhook_secret: String,
         github_app_identifier: u64,
         github_uri: String,
-        public_addr: Option<SocketAddr>,
+        webhook_addr: Option<SocketAddr>,
+        webhook_endpoint: Option<String>,
         internal_addr: Option<SocketAddr>,
     }
 
@@ -42,10 +43,13 @@ pub fn load_github_app_config() -> Result<
         app_key,
         uri,
     };
-    let public_ep_config = PublicEndpointConfiguration {
+    let public_ep_config = WebhookEndpointConfiguration {
         addr: raw_config
-            .public_addr
+            .webhook_addr
             .unwrap_or(SocketAddr::new(IpAddr::from([0, 0, 0, 0]), 3000)),
+        path: raw_config
+            .webhook_endpoint
+            .unwrap_or("/event_handler".into()),
     };
     let internal_ep_config = InternalEndpointConfiguration {
         addr: raw_config
@@ -63,8 +67,9 @@ pub struct GitHubAppConfiguration {
 }
 
 #[derive(Debug)]
-pub struct PublicEndpointConfiguration {
+pub struct WebhookEndpointConfiguration {
     pub addr: SocketAddr,
+    pub path: String,
 }
 
 #[derive(Debug)]

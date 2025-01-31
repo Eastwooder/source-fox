@@ -1,7 +1,7 @@
 pub mod config;
 pub mod routes;
 
-use crate::config::{InternalEndpointConfiguration, PublicEndpointConfiguration};
+use crate::config::{InternalEndpointConfiguration, WebhookEndpointConfiguration};
 use axum::{middleware::from_fn, Router};
 use config::GitHubAppConfiguration;
 use github_event_handler::authentication::GitHubAppAuthenticator;
@@ -12,7 +12,7 @@ use tracing::instrument;
 #[instrument(skip(app_config))]
 pub async fn public_app<C: GitHubAppAuthenticator>(
     app_config: GitHubAppConfiguration,
-    endpoint_config: PublicEndpointConfiguration,
+    endpoint_config: WebhookEndpointConfiguration,
 ) -> Result<(), Box<dyn std::error::Error>>
 where
     C::Error: 'static,
@@ -20,7 +20,7 @@ where
 {
     let routes = Router::new()
         .merge(routes::ui::router())
-        .merge(routes::event_handler::router::<C>(app_config).await?)
+        .merge(routes::event_handler::router::<C>(app_config, &endpoint_config.path).await?)
         .route_layer(from_fn(track_metrics));
 
     let listener = {

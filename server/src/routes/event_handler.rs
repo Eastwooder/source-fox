@@ -18,6 +18,7 @@ mod extractors;
 
 pub async fn router<C: GitHubAppAuthenticator>(
     config: GitHubAppConfiguration,
+    path: &str,
 ) -> Result<Router, Box<dyn std::error::Error>>
 where
     C::Error: 'static,
@@ -28,10 +29,7 @@ where
         webhook_secret: config.webhook_secret.into(),
         client,
     };
-    Ok(Router::new().route(
-        "/event_handler",
-        any(handle_github_event).with_state(signature_config),
-    ))
+    Ok(Router::new().route(path, any(handle_github_event).with_state(signature_config)))
 }
 
 #[derive(Clone)]
@@ -155,7 +153,9 @@ mod test {
     #[tokio::test]
     async fn test_happy_path() {
         let (config, _, secret) = create_test_config();
-        let app = super::router::<TestClient>(config).await.unwrap();
+        let app = super::router::<TestClient>(config, "/event_handler")
+            .await
+            .unwrap();
 
         let body = serde_json::to_vec(&json!(
             {
@@ -187,7 +187,9 @@ mod test {
     #[tokio::test]
     async fn test_missing_signature() {
         let (config, _, _) = create_test_config();
-        let app = super::router::<TestClient>(config).await.unwrap();
+        let app = super::router::<TestClient>(config, "/event_handler")
+            .await
+            .unwrap();
 
         let body = serde_json::to_vec(&json!({"hello": "world"})).unwrap();
         let request = Request::builder()
@@ -204,7 +206,9 @@ mod test {
     #[tokio::test]
     async fn test_wrong_signature() {
         let (config, _, _) = create_test_config();
-        let app = super::router::<TestClient>(config).await.unwrap();
+        let app = super::router::<TestClient>(config, "/event_handler")
+            .await
+            .unwrap();
 
         let body = serde_json::to_vec(&json!({"hello": "world"})).unwrap();
         let request = Request::builder()
